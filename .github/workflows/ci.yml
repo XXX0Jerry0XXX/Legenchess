@@ -30,3 +30,9 @@ jobs:
 
       - name: Test
         run: npm test
+
+      - name: Generate API docs
+        run: npm run docs
+
+      - name: Check API docs are up to date
+        run: git diff --exit-code docs/api
