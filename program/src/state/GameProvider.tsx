@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useReducer, type ReactNode } from 'react';
 import { AI_STEP_DELAY_MS, AUTO_SETUP_DELAY_MS, TICK_MS } from '../game/constants';
 import { createInitialState, reducer, type Action } from '../game/reducer';
-import { chooseExpertAiActions } from '../game/expertAi';
+import { chooseAiActions } from '../game/ai/runner';
 import type { GameState } from '../game/types';
 import { hasSave, loadGame, saveGame } from './storage';
 
@@ -50,10 +50,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       !state.winner
     ) {
       const timer = window.setTimeout(() => {
-        const actions =
-          state.aiLevel === 'expert'
-            ? chooseExpertAiActions(state, reducer)
-            : [{ type: 'AI_STEP' as const }];
+        const actions = chooseAiActions(state, reducer);
         dispatch({ type: 'APPLY_ACTIONS', actions });
       }, AI_STEP_DELAY_MS);
       return () => window.clearTimeout(timer);

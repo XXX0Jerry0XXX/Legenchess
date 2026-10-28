@@ -2,7 +2,7 @@ import { checkWinner, computeAp, opponent } from './engine';
 import { isInAttackRange, pieceCell } from './ranges';
 import type { Cell, GameState, Piece } from './types';
 
-function clonePieces(state: GameState, updates: Record<string, Partial<Piece>>): GameState['pieces'] {
+export function clonePieces(state: GameState, updates: Record<string, Partial<Piece>>): GameState['pieces'] {
   const pieces = { ...state.pieces };
   for (const [id, patch] of Object.entries(updates)) {
     pieces[id] = { ...pieces[id], ...patch };
@@ -35,12 +35,18 @@ export function dealDamage(
     attackerDamage = target.atk;
   }
 
+  const pieces = clonePieces(state, {
+    [attackerId]: { hp: attacker.hp - attackerDamage },
+    [targetId]: { hp: target.hp - targetDamage },
+  });
+
+  const pendingPromotion =
+    attacker.type === 'novice' && pieces[targetId].hp <= 0 ? attackerId : state.pendingPromotion;
+
   return {
     ...state,
-    pieces: clonePieces(state, {
-      [attackerId]: { hp: attacker.hp - attackerDamage },
-      [targetId]: { hp: target.hp - targetDamage },
-    }),
+    pieces,
+    pendingPromotion,
   };
 }
 
@@ -71,6 +77,11 @@ export function removeDeadPieces(state: GameState): GameState {
     deadThisTurn: [...state.deadThisTurn, ...deadIds],
   };
   next.winner = checkWinner(next);
+  if (next.winner !== null) {
+    next.phase = 'finished';
+    next.clockRunning = false;
+    next.turnStarted = false;
+  }
   return next;
 }
 
@@ -95,4 +106,43 @@ export function endTurn(state: GameState): GameState {
   };
   next.ap = computeAp(next);
   return next;
+}
+
+export function applyGameAction(state: GameState, action: import('./types').GameAction): GameState {
+  switch (action.type) {
+    case 'dealDamage': {
+      const damaged = dealDamage(state, action.attackerId, action.targetId, {
+        counterImmune: action.counterImmune,
+        targetDamage: action.amount,
+      });
+      return removeDeadPieces(damaged);
+    }
+    case 'heal': {
+      const piece = state.pieces[action.pieceId];
+      if (!piece) return state;
+      return {
+        ...state,
+        pieces: clonePieces(state, {
+          [action.pieceId]: { hp: Math.min(piece.maxHp, piece.hp + action.amount) },
+        }),
+      };
+    }
+    case 'move':
+      return movePiece(state, action.pieceId, action.to);
+    case 'revive': {
+      const piece = state.pieces[action.pieceId];
+      if (!piece) return state;
+      const board = state.board.map((row) => row.slice());
+      board[action.to.r][action.to.c] = action.pieceId;
+      return {
+        ...state,
+        board,
+        pieces: clonePieces(state, { [action.pieceId]: { dead: false, hp: piece.maxHp } }),
+      };
+    }
+    case 'endTurn':
+      return endTurn(state);
+    default:
+      return state;
+  }
 }
