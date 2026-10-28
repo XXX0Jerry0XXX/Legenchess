@@ -1,5 +1,5 @@
 import { ATTACK_COST, MAX_MAGE_TARGETS, MOVE_COST, PIECE_DEFS, SKILL_COST } from '../game/constants';
-import { getPiece } from '../game/registry';
+import { getPiece, getSkill } from '../game/registry';
 import { getAttackCells, getMageSkillCells, getWarriorSkillCells } from '../game/ranges';
 import { useGame } from '../state/GameProvider';
 
@@ -7,6 +7,11 @@ export function ControlPanel() {
   const { state, dispatch } = useGame();
   const selected = state.selectedId ? state.pieces[state.selectedId] : null;
   const ap = state.ap;
+  const selectedDef = selected ? getPiece(selected.type) : null;
+  const selectedSkill = selectedDef ? getSkill(selectedDef.skill) : null;
+  const isBuiltinSkill = selectedDef
+    ? ['warrior', 'mage', 'assassin', 'priest', 'promote'].includes(selectedDef.skill)
+    : true;
 
   const hasTargets =
     selected && getAttackCells(state, selected.id).length > 0;
@@ -86,6 +91,23 @@ export function ControlPanel() {
                 牧师技能
               </button>
             )}
+            {selectedSkill && !isBuiltinSkill && selectedSkill.targetMode === 'none' && (
+              <button
+                disabled={ap < selectedSkill.cost || !selectedSkill.canUse(state, selected.id)}
+                onClick={() => dispatch({ type: 'ACTIVATE_SKILL' })}
+              >
+                技能
+              </button>
+            )}
+            {selectedSkill && !isBuiltinSkill && selectedSkill.targetMode !== 'none' && (
+              <button
+                className={state.actionMode === 'skill' ? 'active-mode' : ''}
+                disabled={ap < selectedSkill.cost}
+                onClick={() => dispatch({ type: 'SET_MODE', mode: 'skill' })}
+              >
+                技能
+              </button>
+            )}
           </>
         )}
 
@@ -98,6 +120,24 @@ export function ControlPanel() {
               onClick={() => dispatch({ type: 'CONFIRM_MAGE' })}
             >
               确认施法
+            </button>
+          </>
+        )}
+
+        {state.actionMode === 'skill' && selectedSkill && selectedSkill.targetMode !== 'none' && (
+          <>
+            <span>
+              已选 {state.skillTargets.length}/{selectedSkill.maxTargets ?? (selectedSkill.targetMode === 'multi' ? 3 : 1)}
+            </span>
+            <button
+              className="primary"
+              disabled={
+                (selectedSkill.targetMode === 'single' && state.skillTargets.length !== 1) ||
+                (selectedSkill.targetMode === 'multi' && state.skillTargets.length < 1)
+              }
+              onClick={() => dispatch({ type: 'CONFIRM_SKILL' })}
+            >
+              确认技能
             </button>
           </>
         )}

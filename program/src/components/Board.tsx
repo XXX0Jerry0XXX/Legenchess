@@ -6,6 +6,7 @@ import {
   getWarriorSkillCells,
   pieceCell,
 } from '../game/ranges';
+import { getPiece, getSkill } from '../game/registry';
 import { useGame } from '../state/GameProvider';
 import type { Cell } from '../game/types';
 import { Piece } from './Piece';
@@ -18,6 +19,8 @@ export function Board() {
   const { state, dispatch } = useGame();
   const selected = state.selectedId ? state.pieces[state.selectedId] : null;
   const selectedCell = selected ? pieceCell(state, selected.id) : null;
+  const selectedDef = selected ? getPiece(selected.type) : null;
+  const selectedSkill = selectedDef ? getSkill(selectedDef.skill) : null;
 
   const moveCells =
     selected &&
@@ -31,6 +34,10 @@ export function Board() {
       : [];
   const warriorCells = selected && state.actionMode === 'warrior' ? getWarriorSkillCells(state, selected.id) : [];
   const mageCells = selected && state.actionMode === 'mage' ? getMageSkillCells(state, selected.id) : [];
+  const skillCells =
+    selected && selectedSkill && state.actionMode === 'skill'
+      ? selectedSkill.getTargetCells(state, selected.id)
+      : [];
 
   const isHighlight = (r: number, c: number): boolean => {
     if (state.phase === 'setup') {
@@ -48,6 +55,7 @@ export function Board() {
       return attackCells.some((x) => sameCell(x, cell));
     if (state.actionMode === 'warrior') return warriorCells.some((x) => sameCell(x, cell));
     if (state.actionMode === 'mage') return mageCells.some((x) => sameCell(x, cell));
+    if (state.actionMode === 'skill') return skillCells.some((x) => sameCell(x, cell));
     return false;
   };
 
@@ -89,6 +97,8 @@ export function Board() {
         if (id && isHighlight(r, c)) dispatch({ type: 'WARRIOR', targetId: id });
       } else if (state.actionMode === 'mage') {
         if (id && isHighlight(r, c)) dispatch({ type: 'TOGGLE_MAGE', id });
+      } else if (state.actionMode === 'skill') {
+        if (id && isHighlight(r, c)) dispatch({ type: 'TOGGLE_SKILL_TARGET', id });
       } else if (state.actionMode === 'revive') {
         if (isPrepCell(state.currentPlayer, r) && state.board[r][c] === null) {
           dispatch({ type: 'PLACE_REVIVE', r, c });
@@ -120,7 +130,8 @@ export function Board() {
         ((state.actionMode === 'attack' && isHighlight(r, c)) ||
           (state.actionMode === 'assassinAttack' && isHighlight(r, c)) ||
           (state.actionMode === 'warrior' && isHighlight(r, c)) ||
-          (state.actionMode === 'mage' && isHighlight(r, c)))
+          (state.actionMode === 'mage' && isHighlight(r, c)) ||
+          (state.actionMode === 'skill' && isHighlight(r, c)))
       ) {
         classes.push('target');
       }
