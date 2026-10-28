@@ -10,7 +10,10 @@ export const BUILTIN_SKILLS: SkillDefinition[] = [
     targetMode: 'single',
     getTargetCells: getWarriorSkillCells,
     canUse: (state, pieceId) => state.ap >= 2 && getWarriorSkillCells(state, pieceId).length > 0,
-    apply: (state) => state,
+    getActions: (_state, pieceId, targetIds) =>
+      targetIds[0]
+        ? [{ type: 'dealDamage', attackerId: pieceId, targetId: targetIds[0], amount: 2, counterImmune: true }]
+        : [],
   },
   {
     id: 'mage',
@@ -21,7 +24,14 @@ export const BUILTIN_SKILLS: SkillDefinition[] = [
     maxTargets: 3,
     getTargetCells: getMageSkillCells,
     canUse: (state, pieceId) => state.ap >= 2 && getMageSkillCells(state, pieceId).length > 0,
-    apply: (state) => state,
+    getActions: (_state, pieceId, targetIds) =>
+      targetIds.map((targetId) => ({
+        type: 'dealDamage',
+        attackerId: pieceId,
+        targetId,
+        amount: 2,
+        counterImmune: true,
+      })),
   },
   {
     id: 'assassin',
@@ -31,7 +41,7 @@ export const BUILTIN_SKILLS: SkillDefinition[] = [
     targetMode: 'none',
     getTargetCells: () => [],
     canUse: (state) => state.ap >= 2,
-    apply: (state) => state,
+    getActions: () => [],
   },
   {
     id: 'priest',
@@ -45,7 +55,7 @@ export const BUILTIN_SKILLS: SkillDefinition[] = [
       [...state.lastTurnDeaths, ...state.previousTurnDeaths].some(
         (id) => state.pieces[id]?.owner === state.currentPlayer && state.pieces[id]?.dead,
       ),
-    apply: (state) => state,
+    getActions: () => [],
   },
   {
     id: 'promote',
@@ -55,6 +65,6 @@ export const BUILTIN_SKILLS: SkillDefinition[] = [
     targetMode: 'none',
     getTargetCells: () => [],
     canUse: () => false,
-    apply: (state) => state,
+    getActions: () => [],
   },
 ];

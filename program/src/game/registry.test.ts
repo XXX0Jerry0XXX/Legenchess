@@ -26,7 +26,7 @@ describe('Mod 注册表', () => {
       targetMode: 'none',
       getTargetCells: () => [],
       canUse: () => true,
-      apply: (state) => state,
+      getActions: () => [],
     };
     registerSkill(skill);
     expect(getSkill('custom_slash')?.name).toBe('斩击');

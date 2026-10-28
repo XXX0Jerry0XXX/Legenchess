@@ -1,12 +1,25 @@
 /**
  * 传奇棋 Mod 公共 API。
- * 外部代码应从该入口导入类型、常量和游戏规则函数。
+ * 外部代码应从该入口导入 Legenchess 和公开类型。
  */
-export * from './types';
-export * from './constants';
-export * from './engine';
-export * from './ranges';
-export * from './rules';
-export * from './registry';
+export { Legenchess } from './api';
 export { createInitialState, reducer } from './reducer';
 export type { Action } from './reducer';
+export type {
+  ActionMode,
+  AttackKind,
+  Cell,
+  GameAction,
+  GameMode,
+  GameState,
+  MoveKind,
+  Owner,
+  Phase,
+  Piece,
+  PieceDef,
+  PieceType,
+  SkillDefinition,
+  SkillId,
+  SkillKind,
+  Winner,
+} from './types';

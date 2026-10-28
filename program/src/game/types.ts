@@ -38,8 +38,15 @@ export interface SkillDefinition {
   maxTargets?: number;
   getTargetCells(state: GameState, pieceId: string): Cell[];
   canUse(state: GameState, pieceId: string): boolean;
-  apply(state: GameState, pieceId: string, targetIds: string[]): GameState;
+  getActions(state: GameState, pieceId: string, targetIds: string[]): GameAction[];
 }
+
+export type GameAction =
+  | { type: 'dealDamage'; attackerId: string; targetId: string; amount: number; counterImmune?: boolean }
+  | { type: 'heal'; pieceId: string; amount: number }
+  | { type: 'move'; pieceId: string; to: Cell }
+  | { type: 'revive'; pieceId: string; to: Cell }
+  | { type: 'endTurn' };
 
 export interface Piece {
   id: string;

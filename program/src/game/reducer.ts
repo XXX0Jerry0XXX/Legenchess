@@ -23,8 +23,15 @@ import {
   pieceCell,
 } from './ranges';
 import { randomSetupPlacements } from './setup';
+import {
+  dealDamage as rulesDealDamage,
+  endTurn as rulesEndTurn,
+  movePiece as rulesMovePiece,
+  removeDeadPieces as rulesRemoveDeadPieces,
+} from './rules';
 import type {
   ActionMode,
+  GameAction,
   GameState,
   Owner,
   Piece,
@@ -48,6 +55,7 @@ export type Action =
   | { type: 'TOGGLE_SKILL_TARGET'; id: string }
   | { type: 'CONFIRM_SKILL' }
   | { type: 'ACTIVATE_SKILL' }
+  | { type: 'APPLY_GAME_ACTIONS'; actions: GameAction[] }
   | { type: 'USE_ASSASSIN' }
   | { type: 'ASSASSIN_MOVE'; r: number; c: number }
   | { type: 'ASSASSIN_ATTACK'; targetId: string }
@@ -214,6 +222,45 @@ function startPlay(state: GameState): GameState {
   };
   next.ap = computeAp(next);
   return next;
+}
+
+function applyGameAction(state: GameState, action: GameAction): GameState {
+  switch (action.type) {
+    case 'dealDamage': {
+      const damaged = rulesDealDamage(state, action.attackerId, action.targetId, {
+        counterImmune: action.counterImmune,
+        targetDamage: action.amount,
+      });
+      return rulesRemoveDeadPieces(damaged);
+    }
+    case 'heal': {
+      const piece = state.pieces[action.pieceId];
+      if (!piece) return state;
+      return {
+        ...state,
+        pieces: clonePieces(state, {
+          [action.pieceId]: { hp: Math.min(piece.maxHp, piece.hp + action.amount) },
+        }),
+      };
+    }
+    case 'move':
+      return rulesMovePiece(state, action.pieceId, action.to);
+    case 'revive': {
+      const piece = state.pieces[action.pieceId];
+      if (!piece) return state;
+      const board = state.board.map((row) => row.slice());
+      board[action.to.r][action.to.c] = action.pieceId;
+      return {
+        ...state,
+        board,
+        pieces: clonePieces(state, { [action.pieceId]: { dead: false, hp: piece.maxHp } }),
+      };
+    }
+    case 'endTurn':
+      return rulesEndTurn(state);
+    default:
+      return state;
+  }
 }
 
 function timeoutResult(state: GameState): GameState {
@@ -413,7 +460,7 @@ export function reducer(state: GameState, action: Action): GameState {
       const targetIds = state.skillTargets;
       if (skill.targetMode === 'multi' && targetIds.length < 1) return state;
       if (skill.targetMode === 'single' && targetIds.length !== 1) return state;
-      const next = skill.apply(state, id, targetIds);
+      const next = skill.getActions(state, id, targetIds).reduce(applyGameAction, state);
       return {
         ...next,
         ap: state.ap - skill.cost,
@@ -431,7 +478,7 @@ export function reducer(state: GameState, action: Action): GameState {
       const def = getPiece(piece.type);
       const skill = def ? getSkill(def.skill) : null;
       if (!skill || skill.targetMode !== 'none' || !skill.canUse(state, id) || state.ap < skill.cost) return state;
-      const next = skill.apply(state, id, []);
+      const next = skill.getActions(state, id, []).reduce(applyGameAction, state);
       return {
         ...next,
         ap: state.ap - skill.cost,
@@ -441,6 +488,9 @@ export function reducer(state: GameState, action: Action): GameState {
         clockRunning: true,
       };
     }
+
+    case 'APPLY_GAME_ACTIONS':
+      return action.actions.reduce(applyGameAction, state);
 
     case 'USE_ASSASSIN': {
       const id = state.selectedId;

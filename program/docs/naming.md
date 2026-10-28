@@ -34,3 +34,9 @@
 
 - AI 相关常量使用 `AI_` 前缀，例如 `AI_STEP_DELAY_MS`。
 - 时间相关常量带单位后缀，例如 `TICK_MS`、`PLAYER_TIME_SECONDS`。
+
+## 公共 API
+
+- 公共入口统一使用 `Legenchess` 命名空间，不直接深路径导入内部模块。
+- 原子动作使用 `UPPER_SNAKE_CASE` 字符串类型，例如 `dealDamage`、`APPLY_GAME_ACTIONS`。
+- 注册表函数保持 `register`、`get`、`list`、`reset` 前缀。

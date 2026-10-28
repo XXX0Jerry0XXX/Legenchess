@@ -1,5 +1,5 @@
 {
-  "entryPoints": ["src/game/index.ts"],
+  "entryPoints": ["src/game/index.ts", "src/game/api.ts"],
   "out": "docs/api",
   "plugin": ["typedoc-plugin-markdown"],
   "readme": "none",
