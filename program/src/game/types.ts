@@ -64,6 +64,7 @@ export type Cell = { r: number; c: number };
 
 export type Phase = 'start' | 'setup' | 'observe' | 'play' | 'finished';
 export type GameMode = 'local' | 'ai';
+export type AiLevel = 'beginner' | 'expert';
 
 export type ActionMode =
   | null
@@ -82,6 +83,7 @@ export interface GameState {
   phase: Phase;
   mode: GameMode;
   aiPlayer: Owner | null;
+  aiLevel: AiLevel;
   firstPlayer: Owner;
   currentPlayer: Owner;
   setupOwner: Owner;

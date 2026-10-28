@@ -7,6 +7,7 @@ export { createInitialState, reducer } from './reducer';
 export type { Action } from './reducer';
 export type {
   ActionMode,
+  AiLevel,
   AttackKind,
   Cell,
   GameAction,

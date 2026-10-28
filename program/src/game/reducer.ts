@@ -39,7 +39,7 @@ import type {
 } from './types';
 
 export type Action =
-  | { type: 'START_SETUP'; firstPlayer: Owner; mode?: GameState['mode']; aiPlayer?: Owner | null }
+  | { type: 'START_SETUP'; firstPlayer: Owner; mode?: GameState['mode']; aiPlayer?: Owner | null; aiLevel?: GameState['aiLevel'] }
   | { type: 'SELECT_SETUP'; pieceType: PieceType | null }
   | { type: 'PLACE_SETUP'; r: number; c: number }
   | { type: 'UNDO_SETUP'; r: number; c: number }
@@ -56,6 +56,7 @@ export type Action =
   | { type: 'CONFIRM_SKILL' }
   | { type: 'ACTIVATE_SKILL' }
   | { type: 'APPLY_GAME_ACTIONS'; actions: GameAction[] }
+  | { type: 'APPLY_ACTIONS'; actions: Action[] }
   | { type: 'USE_ASSASSIN' }
   | { type: 'ASSASSIN_MOVE'; r: number; c: number }
   | { type: 'ASSASSIN_ATTACK'; targetId: string }
@@ -81,6 +82,7 @@ export function createInitialState(): GameState {
     phase: 'start',
     mode: 'local',
     aiPlayer: null,
+    aiLevel: 'beginner',
     firstPlayer: 0,
     currentPlayer: 0,
     setupOwner: 0,
@@ -278,6 +280,7 @@ export function reducer(state: GameState, action: Action): GameState {
         phase: 'setup',
         mode: action.mode ?? 'local',
         aiPlayer: action.aiPlayer ?? null,
+        aiLevel: action.aiLevel ?? 'beginner',
         firstPlayer: action.firstPlayer,
         currentPlayer: action.firstPlayer,
       };
@@ -491,6 +494,9 @@ export function reducer(state: GameState, action: Action): GameState {
 
     case 'APPLY_GAME_ACTIONS':
       return action.actions.reduce(applyGameAction, state);
+
+    case 'APPLY_ACTIONS':
+      return action.actions.reduce((next, act) => reducer(next, act), state);
 
     case 'USE_ASSASSIN': {
       const id = state.selectedId;
