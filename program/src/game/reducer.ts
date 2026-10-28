@@ -153,6 +153,7 @@ function dealDamage(
   }
 
   const next: GameState = { ...state, pieces, pendingPromotion };
+  if (pendingPromotion) return next;
   return removeDead(next);
 }
 
@@ -445,18 +446,21 @@ export function reducer(state: GameState, action: Action): GameState {
       if (!id || !PROMOTABLE.includes(action.pieceType)) return state;
       const def = PIECE_DEFS[action.pieceType];
       const piece = state.pieces[id];
-      return {
+      const damageTaken = piece.maxHp - piece.hp;
+      const hp = Math.max(0, def.hp - damageTaken);
+      const next: GameState = {
         ...state,
         pieces: clonePieces(state, {
           [id]: {
             type: action.pieceType,
             maxHp: def.hp,
-            hp: piece.dead ? 0 : def.hp,
+            hp,
             atk: def.atk,
           },
         }),
         pendingPromotion: null,
       };
+      return removeDead(next);
     }
 
     case 'END_TURN':
