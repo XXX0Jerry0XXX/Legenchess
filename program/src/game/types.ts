@@ -48,6 +48,40 @@ export type GameAction =
   | { type: 'revive'; pieceId: string; to: Cell }
   | { type: 'endTurn' };
 
+export type Action =
+  | { type: 'START_SETUP'; firstPlayer: Owner; mode?: GameState['mode']; aiPlayer?: Owner | null; aiLevel?: GameState['aiLevel'] }
+  | { type: 'SELECT_SETUP'; pieceType: PieceType | null }
+  | { type: 'PLACE_SETUP'; r: number; c: number }
+  | { type: 'UNDO_SETUP'; r: number; c: number }
+  | { type: 'NEXT_SETUP' }
+  | { type: 'START_PLAY' }
+  | { type: 'SELECT_PIECE'; id: string | null }
+  | { type: 'SET_MODE'; mode: ActionMode }
+  | { type: 'MOVE'; r: number; c: number }
+  | { type: 'ATTACK'; targetId: string }
+  | { type: 'WARRIOR'; targetId: string }
+  | { type: 'TOGGLE_MAGE'; id: string }
+  | { type: 'CONFIRM_MAGE' }
+  | { type: 'TOGGLE_SKILL_TARGET'; id: string }
+  | { type: 'CONFIRM_SKILL' }
+  | { type: 'ACTIVATE_SKILL' }
+  | { type: 'USE_ASSASSIN' }
+  | { type: 'ASSASSIN_MOVE'; r: number; c: number }
+  | { type: 'ASSASSIN_ATTACK'; targetId: string }
+  | { type: 'CHOOSE_REVIVE'; id: string }
+  | { type: 'PLACE_REVIVE'; r: number; c: number }
+  | { type: 'CHOOSE_PROMOTION'; pieceType: PieceType }
+  | { type: 'END_TURN' }
+  | { type: 'TICK' }
+  | { type: 'OBSERVE_TICK' }
+  | { type: 'RESIGN'; owner: Owner }
+  | { type: 'AUTO_SETUP' }
+  | { type: 'AI_STEP' }
+  | { type: 'APPLY_GAME_ACTIONS'; actions: GameAction[] }
+  | { type: 'APPLY_ACTIONS'; actions: Action[] }
+  | { type: 'IMPORT_PRESET'; owner: Owner; placements: { type: PieceType; r: number; c: number }[] }
+  | { type: 'RESTORE'; state: GameState };
+
 export interface Piece {
   id: string;
   owner: Owner;

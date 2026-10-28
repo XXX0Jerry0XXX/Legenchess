@@ -1,6 +1,6 @@
 import { ATTACK_COST, MOVE_COST, SKILL_COST } from './constants';
 import { getAttackCells, getMoveCells } from './ranges';
-import type { Action } from './reducer';
+import type { Action } from './types';
 import { shuffled, emptyPrepCell } from './setup';
 import type { GameState } from './types';
 

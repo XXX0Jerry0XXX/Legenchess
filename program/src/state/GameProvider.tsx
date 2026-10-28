@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useReducer, type ReactNode } from 'react';
 import { AI_STEP_DELAY_MS, AUTO_SETUP_DELAY_MS, TICK_MS } from '../game/constants';
-import { createInitialState, reducer, type Action } from '../game/reducer';
+import { createInitialState, reducer } from '../game/reducer';
+import type { Action } from '../game/types';
 import { chooseAiActions } from '../game/ai/runner';
 import type { GameState } from '../game/types';
 import { hasSave, loadGame, saveGame } from './storage';

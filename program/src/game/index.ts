@@ -4,7 +4,7 @@
  */
 export { Legenchess } from './api';
 export { createInitialState, reducer } from './reducer';
-export type { Action } from './reducer';
+export type { Action } from './types';
 export type {
   ActionMode,
   AiLevel,

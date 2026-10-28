@@ -1,7 +1,7 @@
 import { getPiece, getSkill } from './registry';
 import { getAttackCells, getMoveCells, getWarriorSkillCells, getMageSkillCells } from './ranges';
 import { emptyPrepCell, shuffled } from './setup';
-import type { Action } from './reducer';
+import type { Action } from './types';
 import type { GameState } from './types';
 
 const PIECE_VALUE: Record<string, number> = {

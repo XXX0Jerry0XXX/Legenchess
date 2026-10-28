@@ -1,6 +1,6 @@
 import { chooseBeginnerAiActions } from '../ai';
 import { chooseExpertAiActions } from '../expertAi';
-import type { Action } from '../reducer';
+import type { Action } from '../types';
 import type { GameState } from '../types';
 
 export function chooseAiActions(
