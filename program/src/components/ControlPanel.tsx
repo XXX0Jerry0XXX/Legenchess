@@ -11,7 +11,8 @@ export function ControlPanel() {
     selected && getAttackCells(state, selected.id).length > 0;
   const hasWarriorTargets = selected ? getWarriorSkillCells(state, selected.id).length > 0 : false;
   const hasMageTargets = selected ? getMageSkillCells(state, selected.id).length > 0 : false;
-  const revivable = state.lastTurnDeaths.some(
+  const deathPool = [...state.lastTurnDeaths, ...state.previousTurnDeaths];
+  const revivable = deathPool.some(
     (id) => state.pieces[id]?.owner === state.currentPlayer && state.pieces[id]?.dead && state.pieces[id].type !== 'chairman',
   );
 
@@ -105,7 +106,7 @@ export function ControlPanel() {
             {!state.pendingRevive ? (
               <>
                 <span>选择要复活的棋子：</span>
-                {state.lastTurnDeaths
+                {deathPool
                   .filter(
                     (id) =>
                       state.pieces[id]?.owner === state.currentPlayer &&

@@ -76,6 +76,7 @@ export function createInitialState(): GameState {
     actionMode: null,
     mageTargets: [],
     lastTurnDeaths: [],
+    previousTurnDeaths: [],
     deadThisTurn: [],
     pendingPromotion: null,
     pendingRevive: null,
@@ -168,6 +169,7 @@ function endTurn(state: GameState): GameState {
     ...state,
     currentPlayer,
     turn,
+    previousTurnDeaths: state.lastTurnDeaths,
     lastTurnDeaths: state.deadThisTurn,
     deadThisTurn: [],
     selectedId: null,
@@ -261,7 +263,8 @@ function beginnerAiStep(state: GameState): GameState {
   }
 
   if (state.ap >= 2) {
-    const revivable = state.lastTurnDeaths.find(
+    const deathPool = [...state.lastTurnDeaths, ...state.previousTurnDeaths];
+    const revivable = deathPool.find(
       (id) =>
         state.pieces[id]?.owner === state.currentPlayer &&
         state.pieces[id]?.dead &&
@@ -537,7 +540,7 @@ export function reducer(state: GameState, action: Action): GameState {
       if (!id || state.pieces[id].type !== 'priest') return state;
       const target = state.pieces[action.id];
       if (!target || target.owner !== state.currentPlayer || !target.dead || target.type === 'chairman') return state;
-      if (!state.lastTurnDeaths.includes(action.id)) return state;
+      if (!state.lastTurnDeaths.includes(action.id) && !state.previousTurnDeaths.includes(action.id)) return state;
       return { ...state, pendingRevive: action.id, actionMode: 'revive', mageTargets: [] };
     }
 
@@ -553,6 +556,7 @@ export function reducer(state: GameState, action: Action): GameState {
         board,
         pieces: clonePieces(state, { [id]: { dead: false, hp: piece.maxHp } }),
         lastTurnDeaths: state.lastTurnDeaths.filter((x) => x !== id),
+        previousTurnDeaths: state.previousTurnDeaths.filter((x) => x !== id),
         ap: state.ap - 2,
         actionMode: null,
         pendingRevive: null,

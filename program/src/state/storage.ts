@@ -17,6 +17,7 @@ export function loadGame(): GameState | null {
     const parsed = JSON.parse(raw) as Partial<GameState>;
     if (parsed.mode === undefined) parsed.mode = 'local';
     if (parsed.aiPlayer === undefined) parsed.aiPlayer = null;
+    if (parsed.previousTurnDeaths === undefined) parsed.previousTurnDeaths = [];
     return parsed as GameState;
   } catch {
     return null;

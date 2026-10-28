@@ -74,6 +74,7 @@ export interface GameState {
   actionMode: ActionMode;
   mageTargets: string[];
   lastTurnDeaths: string[];
+  previousTurnDeaths: string[];
   deadThisTurn: string[];
   pendingPromotion: string | null;
   pendingRevive: string | null;
