@@ -284,7 +284,7 @@ export function reducer(state: GameState, action: Action): GameState {
 
     case 'MOVE': {
       const id = state.selectedId;
-      if (!id || state.actionMode !== 'move') return state;
+      if (!id || state.actionMode !== 'move' || state.ap < 1) return state;
       const from = pieceCell(state, id);
       if (!from) return state;
       if (!getMoveCells(state, id).some((c) => c.r === action.r && c.c === action.c)) return state;
@@ -303,7 +303,7 @@ export function reducer(state: GameState, action: Action): GameState {
 
     case 'ATTACK': {
       const id = state.selectedId;
-      if (!id || state.actionMode !== 'attack') return state;
+      if (!id || state.actionMode !== 'attack' || state.ap < 1) return state;
       if (!getAttackCells(state, id).some((c) => state.board[c.r][c.c] === action.targetId)) return state;
       const next = dealDamage(state, id, action.targetId);
       return {

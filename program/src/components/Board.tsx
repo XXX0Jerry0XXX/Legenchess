@@ -20,11 +20,13 @@ export function Board() {
   const selectedCell = selected ? pieceCell(state, selected.id) : null;
 
   const moveCells =
-    selected && (state.actionMode === 'move' || state.actionMode === 'assassinMove')
+    selected &&
+    (state.actionMode === 'assassinMove' || (state.actionMode === 'move' && state.ap >= 1))
       ? getMoveCells(state, selected.id)
       : [];
   const attackCells =
-    selected && (state.actionMode === 'attack' || state.actionMode === 'assassinAttack')
+    selected &&
+    ((state.actionMode === 'attack' && state.ap >= 1) || state.actionMode === 'assassinAttack')
       ? getAttackCells(state, selected.id)
       : [];
   const warriorCells = selected && state.actionMode === 'warrior' ? getWarriorSkillCells(state, selected.id) : [];
