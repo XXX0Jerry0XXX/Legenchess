@@ -552,7 +552,7 @@ export function reducer(state: GameState, action: Action): GameState {
       const id = state.selectedId;
       if (!id || state.pieces[id].type !== 'priest') return state;
       const target = state.pieces[action.id];
-      if (!target || target.owner !== state.currentPlayer || !target.dead || target.type === 'chairman') return state;
+      if (!target || target.owner !== state.currentPlayer || !target.dead) return state;
       if (!state.lastTurnDeaths.includes(action.id) && !state.previousTurnDeaths.includes(action.id)) return state;
       return { ...state, pendingRevive: action.id, actionMode: 'revive', mageTargets: [] };
     }

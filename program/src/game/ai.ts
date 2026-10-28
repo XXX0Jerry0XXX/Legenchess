@@ -23,8 +23,7 @@ export function chooseBeginnerAiActions(state: GameState): Action[] {
     const revivable = deathPool.find(
       (id) =>
         state.pieces[id]?.owner === state.currentPlayer &&
-        state.pieces[id]?.dead &&
-        state.pieces[id].type !== 'chairman',
+        state.pieces[id]?.dead,
     );
     if (revivable) {
       const priest = Object.values(state.pieces).find(

@@ -20,7 +20,7 @@ export function ControlPanel() {
   const hasMageTargets = selected ? getMageSkillCells(state, selected.id).length > 0 : false;
   const deathPool = [...state.lastTurnDeaths, ...state.previousTurnDeaths];
   const revivable = deathPool.some(
-    (id) => state.pieces[id]?.owner === state.currentPlayer && state.pieces[id]?.dead && state.pieces[id].type !== 'chairman',
+    (id) => state.pieces[id]?.owner === state.currentPlayer && state.pieces[id]?.dead,
   );
 
   return (
@@ -152,8 +152,7 @@ export function ControlPanel() {
                   .filter(
                     (id) =>
                       state.pieces[id]?.owner === state.currentPlayer &&
-                      state.pieces[id]?.dead &&
-                      state.pieces[id].type !== 'chairman',
+                      state.pieces[id]?.dead,
                   )
                   .map((id) => (
                     <button key={id} onClick={() => dispatch({ type: 'CHOOSE_REVIVE', id })}>

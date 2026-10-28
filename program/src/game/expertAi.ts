@@ -91,7 +91,7 @@ export function chooseExpertAiActions(state: GameState, apply: (s: GameState, a:
   if (state.ap >= 2) {
     const deathPool = [...state.lastTurnDeaths, ...state.previousTurnDeaths];
     const revivable = deathPool.find(
-      (id) => state.pieces[id]?.owner === ai && state.pieces[id]?.dead && state.pieces[id].type !== 'chairman',
+      (id) => state.pieces[id]?.owner === ai && state.pieces[id]?.dead,
     );
     if (revivable) {
       const priest = own.find((p) => p.type === 'priest');
