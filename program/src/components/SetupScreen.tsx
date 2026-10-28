@@ -9,7 +9,7 @@ export function SetupScreen() {
   const { state, dispatch } = useGame();
   const tray = state.setupTray[state.setupOwner];
   const total = Object.values(tray).reduce((a, b) => a + b, 0);
-  const ownerName = state.setupOwner === 0 ? '上方 A' : '下方 B';
+  const ownerName = state.setupOwner === state.firstPlayer ? '先手方' : '后手方';
 
   return (
     <section className="control-panel">

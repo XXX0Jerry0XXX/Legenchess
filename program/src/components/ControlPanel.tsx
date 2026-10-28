@@ -7,6 +7,7 @@ export function ControlPanel() {
   const { state, dispatch } = useGame();
   const selected = state.selectedId ? state.pieces[state.selectedId] : null;
   const ap = state.ap;
+  const isFirst = state.currentPlayer === state.firstPlayer;
   const selectedDef = selected ? getPiece(selected.type) : null;
   const selectedSkill = selectedDef ? getSkill(selectedDef.skill) : null;
   const isBuiltinSkill = selectedDef
@@ -26,7 +27,7 @@ export function ControlPanel() {
     <section className="control-panel">
       <div className="action-list">
         <strong>
-          {state.currentPlayer === 0 ? 'A' : 'B'} 回合 · AP {ap}
+          {isFirst ? '先手方' : '后手方'} 回合 · AP {ap}
         </strong>
         {selected ? (
           <span>
@@ -168,6 +169,9 @@ export function ControlPanel() {
 
         <button className="danger" onClick={() => dispatch({ type: 'END_TURN' })}>
           结束回合
+        </button>
+        <button className="danger" onClick={() => dispatch({ type: 'RESIGN', owner: state.currentPlayer })}>
+          投降
         </button>
       </div>
     </section>

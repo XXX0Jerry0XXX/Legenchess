@@ -22,14 +22,16 @@ function Game() {
     return <StartScreen />;
   }
 
+  const ownerName = (owner: 0 | 1) => (owner === state.firstPlayer ? '先手方' : '后手方');
+
   const phaseLabel =
     state.phase === 'setup'
-      ? `${state.setupOwner === 0 ? '上方 A' : '下方 B'} 布阵`
+      ? `${ownerName(state.setupOwner)} 布阵`
       : state.phase === 'observe'
         ? '双方观察'
         : state.phase === 'finished'
           ? '对局结束'
-          : `${state.currentPlayer === 0 ? '上方 A' : '下方 B'} 回合`;
+          : `${ownerName(state.currentPlayer)} 回合`;
 
   const round = state.turn > 0 ? Math.ceil(state.turn / 2) : 0;
 
@@ -46,21 +48,21 @@ function Game() {
         </div>
         <div className="clocks">
           <div className={`clock ${state.phase === 'play' && state.currentPlayer === 0 ? 'active' : ''}`}>
-            A {formatTime(state.times[0])}
+            {ownerName(0)} {formatTime(state.times[0])}
           </div>
           <div className={`clock ${state.phase === 'play' && state.currentPlayer === 1 ? 'active' : ''}`}>
-            B {formatTime(state.times[1])}
+            {ownerName(1)} {formatTime(state.times[1])}
           </div>
         </div>
         <RulesButton />
       </header>
 
       <section className="layout">
-        <SidePanel owner={0} label="上方 A" />
+        <SidePanel owner={0} label={ownerName(0)} />
         <div className="board-wrap">
           <Board />
         </div>
-        <SidePanel owner={1} label="下方 B" />
+        <SidePanel owner={1} label={ownerName(1)} />
       </section>
 
       {state.phase === 'setup' && <SetupScreen />}
@@ -69,7 +71,7 @@ function Game() {
       {state.phase === 'observe' && (
         <Modal title="双方观察布局">
           <p>
-            先手方为 {state.firstPlayer === 0 ? '上方 A' : '下方 B'}。双方可在 {formatTime(state.observationRemaining)}{' '}
+            先手方为 {ownerName(state.firstPlayer)}。双方可在 {formatTime(state.observationRemaining)}{' '}
             内查看棋盘，先手方可在计时结束前开始第一回合。
           </p>
           <div className="choice-row">
@@ -98,7 +100,7 @@ function Game() {
           <p>
             {state.winner === 'draw'
               ? '平局。'
-              : `${state.winner === 0 ? '上方 A' : '下方 B'} 获胜。`}
+              : `${ownerName(state.winner)} 获胜。`}
           </p>
           <div className="choice-row">
             <button

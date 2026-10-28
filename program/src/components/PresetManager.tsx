@@ -23,7 +23,7 @@ export function PresetManager() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `legenchess-preset-${state.setupOwner === 0 ? 'A' : 'B'}.json`;
+    a.download = `legenchess-preset-${state.setupOwner === state.firstPlayer ? 'first' : 'second'}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
