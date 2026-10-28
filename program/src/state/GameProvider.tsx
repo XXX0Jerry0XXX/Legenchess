@@ -33,6 +33,25 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return () => window.clearInterval(timer);
   }, [state.phase]);
 
+  useEffect(() => {
+    if (state.phase === 'setup' && state.mode === 'ai' && state.setupOwner === state.aiPlayer) {
+      const timer = window.setTimeout(() => dispatch({ type: 'AUTO_SETUP' }), 500);
+      return () => window.clearTimeout(timer);
+    }
+  }, [state.phase, state.mode, state.setupOwner, state.aiPlayer]);
+
+  useEffect(() => {
+    if (
+      state.phase === 'play' &&
+      state.mode === 'ai' &&
+      state.currentPlayer === state.aiPlayer &&
+      !state.winner
+    ) {
+      const timer = window.setTimeout(() => dispatch({ type: 'AI_STEP' }), 600);
+      return () => window.clearTimeout(timer);
+    }
+  }, [state]);
+
   return <GameContext.Provider value={{ state, dispatch, canResume }}>{children}</GameContext.Provider>;
 }
 

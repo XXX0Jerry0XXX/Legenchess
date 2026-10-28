@@ -11,10 +11,20 @@ export function StartScreen() {
       <div className="start-actions">
         <RulesButton />
         <button className="primary" onClick={() => dispatch({ type: 'START_SETUP', firstPlayer: 0 })}>
-          上方 A 先手
+          本地双人 · 上方 A 先手
         </button>
         <button className="primary" onClick={() => dispatch({ type: 'START_SETUP', firstPlayer: 1 })}>
-          下方 B 先手
+          本地双人 · 下方 B 先手
+        </button>
+        <button
+          onClick={() => dispatch({ type: 'START_SETUP', firstPlayer: 0, mode: 'ai', aiPlayer: 1 })}
+        >
+          人机对战 · 我执上方 A（先手）
+        </button>
+        <button
+          onClick={() => dispatch({ type: 'START_SETUP', firstPlayer: 0, mode: 'ai', aiPlayer: 0 })}
+        >
+          人机对战 · 我执下方 B（AI 先手）
         </button>
         {canResume && (
           <button

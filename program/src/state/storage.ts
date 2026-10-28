@@ -14,7 +14,10 @@ export function loadGame(): GameState | null {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     if (!raw) return null;
-    return JSON.parse(raw) as GameState;
+    const parsed = JSON.parse(raw) as Partial<GameState>;
+    if (parsed.mode === undefined) parsed.mode = 'local';
+    if (parsed.aiPlayer === undefined) parsed.aiPlayer = null;
+    return parsed as GameState;
   } catch {
     return null;
   }

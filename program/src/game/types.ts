@@ -43,6 +43,7 @@ export interface Piece {
 export type Cell = { r: number; c: number };
 
 export type Phase = 'start' | 'setup' | 'observe' | 'play' | 'finished';
+export type GameMode = 'local' | 'ai';
 
 export type ActionMode =
   | null
@@ -58,6 +59,8 @@ export type Winner = Owner | 'draw' | null;
 
 export interface GameState {
   phase: Phase;
+  mode: GameMode;
+  aiPlayer: Owner | null;
   firstPlayer: Owner;
   currentPlayer: Owner;
   setupOwner: Owner;

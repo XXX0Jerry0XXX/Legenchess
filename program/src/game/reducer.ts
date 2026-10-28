@@ -25,7 +25,7 @@ import type {
 } from './types';
 
 export type Action =
-  | { type: 'START_SETUP'; firstPlayer: Owner }
+  | { type: 'START_SETUP'; firstPlayer: Owner; mode?: GameState['mode']; aiPlayer?: Owner | null }
   | { type: 'SELECT_SETUP'; pieceType: PieceType | null }
   | { type: 'PLACE_SETUP'; r: number; c: number }
   | { type: 'UNDO_SETUP'; r: number; c: number }
@@ -48,6 +48,8 @@ export type Action =
   | { type: 'TICK' }
   | { type: 'OBSERVE_TICK' }
   | { type: 'RESIGN'; owner: Owner }
+  | { type: 'AUTO_SETUP' }
+  | { type: 'AI_STEP' }
   | { type: 'IMPORT_PRESET'; owner: Owner; placements: { type: PieceType; r: number; c: number }[] }
   | { type: 'RESTORE'; state: GameState };
 
@@ -59,6 +61,8 @@ export function createInitialState(): GameState {
 
   return {
     phase: 'start',
+    mode: 'local',
+    aiPlayer: null,
     firstPlayer: 0,
     currentPlayer: 0,
     setupOwner: 0,
@@ -205,12 +209,128 @@ function timeoutResult(state: GameState): GameState {
   return { ...state, winner, phase: 'finished', clockRunning: false, turnStarted: false };
 }
 
+function shuffled<T>(items: T[]): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+function emptyPrepCell(state: GameState, owner: Owner): Cell | null {
+  for (let r = 0; r < 10; r += 1) {
+    if (!isPrepCell(owner, r)) continue;
+    for (let c = 0; c < 8; c += 1) {
+      if (state.board[r][c] === null) return { r, c };
+    }
+  }
+  return null;
+}
+
+function randomSetupPlacements(owner: Owner): { type: PieceType; r: number; c: number }[] {
+  const cells: Cell[] = [];
+  for (let r = 0; r < 10; r += 1) {
+    if (!isPrepCell(owner, r)) continue;
+    for (let c = 0; c < 8; c += 1) {
+      cells.push({ r, c });
+    }
+  }
+  const chosenCells = shuffled(cells).slice(0, 16);
+  const types: PieceType[] = [];
+  (Object.keys(SETUP_COUNTS) as PieceType[]).forEach((type) => {
+    for (let i = 0; i < SETUP_COUNTS[type]; i += 1) {
+      types.push(type);
+    }
+  });
+  return shuffled(types).map((type, index) => ({ type, r: chosenCells[index].r, c: chosenCells[index].c }));
+}
+
+function beginnerAiStep(state: GameState): GameState {
+  if (
+    state.phase !== 'play' ||
+    state.mode !== 'ai' ||
+    state.currentPlayer !== state.aiPlayer ||
+    state.winner
+  ) {
+    return state;
+  }
+
+  if (state.pendingPromotion) {
+    return reducer(state, { type: 'CHOOSE_PROMOTION', pieceType: 'warrior' });
+  }
+
+  if (state.ap >= 2) {
+    const revivable = state.lastTurnDeaths.find(
+      (id) =>
+        state.pieces[id]?.owner === state.currentPlayer &&
+        state.pieces[id]?.dead &&
+        state.pieces[id].type !== 'chairman',
+    );
+    if (revivable) {
+      const priest = Object.values(state.pieces).find(
+        (p) => p.owner === state.currentPlayer && !p.dead && p.type === 'priest',
+      );
+      const cell = emptyPrepCell(state, state.currentPlayer);
+      if (priest && cell) {
+        let next = reducer(state, { type: 'SELECT_PIECE', id: priest.id });
+        next = reducer(next, { type: 'SET_MODE', mode: 'revive' });
+        next = reducer(next, { type: 'CHOOSE_REVIVE', id: revivable });
+        next = reducer(next, { type: 'PLACE_REVIVE', r: cell.r, c: cell.c });
+        return next;
+      }
+    }
+  }
+
+  if (state.ap >= 1) {
+    const attackers = shuffled(
+      Object.values(state.pieces).filter(
+        (p) => p.owner === state.currentPlayer && !p.dead,
+      ),
+    );
+    for (const piece of attackers) {
+      const targets = shuffled(getAttackCells(state, piece.id));
+      if (targets.length > 0) {
+        const targetId = state.board[targets[0].r][targets[0].c];
+        if (targetId) {
+          let next = reducer(state, { type: 'SELECT_PIECE', id: piece.id });
+          next = reducer(next, { type: 'SET_MODE', mode: 'attack' });
+          next = reducer(next, { type: 'ATTACK', targetId });
+          return next;
+        }
+      }
+    }
+  }
+
+  if (state.ap >= 1) {
+    const movers = shuffled(
+      Object.values(state.pieces).filter(
+        (p) => p.owner === state.currentPlayer && !p.dead,
+      ),
+    );
+    for (const piece of movers) {
+      const cells = shuffled(getMoveCells(state, piece.id));
+      if (cells.length > 0) {
+        const cell = cells[0];
+        let next = reducer(state, { type: 'SELECT_PIECE', id: piece.id });
+        next = reducer(next, { type: 'SET_MODE', mode: 'move' });
+        next = reducer(next, { type: 'MOVE', r: cell.r, c: cell.c });
+        return next;
+      }
+    }
+  }
+
+  return reducer(state, { type: 'END_TURN' });
+}
+
 export function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
     case 'START_SETUP':
       return {
         ...createInitialState(),
         phase: 'setup',
+        mode: action.mode ?? 'local',
+        aiPlayer: action.aiPlayer ?? null,
         firstPlayer: action.firstPlayer,
         currentPlayer: action.firstPlayer,
       };
@@ -492,6 +612,15 @@ export function reducer(state: GameState, action: Action): GameState {
         turnStarted: false,
       };
 
+    case 'AUTO_SETUP': {
+      if (state.phase !== 'setup') return state;
+      const owner = state.setupOwner;
+      const placements = randomSetupPlacements(owner);
+      let next = reducer(state, { type: 'IMPORT_PRESET', owner, placements });
+      next = reducer(next, { type: 'NEXT_SETUP' });
+      return next;
+    }
+
     case 'IMPORT_PRESET': {
       if (state.phase !== 'setup') return state;
       const counts = { ...SETUP_COUNTS };
@@ -538,6 +667,9 @@ export function reducer(state: GameState, action: Action): GameState {
 
     case 'RESTORE':
       return action.state;
+
+    case 'AI_STEP':
+      return beginnerAiStep(state);
 
     default:
       return state;
