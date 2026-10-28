@@ -295,7 +295,7 @@ export function reducer(state: GameState, action: Action): GameState {
         ...state,
         board,
         ap: state.ap - 1,
-        actionMode: null,
+        actionMode: 'move',
         turnStarted: true,
         clockRunning: true,
       };
@@ -309,7 +309,7 @@ export function reducer(state: GameState, action: Action): GameState {
       return {
         ...next,
         ap: state.ap - 1,
-        actionMode: null,
+        actionMode: 'attack',
         turnStarted: true,
         clockRunning: true,
       };
@@ -323,7 +323,7 @@ export function reducer(state: GameState, action: Action): GameState {
       return {
         ...next,
         ap: state.ap - 2,
-        actionMode: null,
+        actionMode: 'warrior',
         turnStarted: true,
         clockRunning: true,
       };
@@ -355,7 +355,7 @@ export function reducer(state: GameState, action: Action): GameState {
       return {
         ...next,
         ap: state.ap - 2,
-        actionMode: null,
+        actionMode: 'mage',
         mageTargets: [],
         turnStarted: true,
         clockRunning: true,
@@ -390,7 +390,7 @@ export function reducer(state: GameState, action: Action): GameState {
         ...state,
         board,
         pieces: clonePieces(state, { [id]: { freeMove: false } }),
-        actionMode: null,
+        actionMode: 'assassinAttack',
         turnStarted: true,
         clockRunning: true,
       };

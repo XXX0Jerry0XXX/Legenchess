@@ -31,19 +31,35 @@ export function ControlPanel() {
 
         {selected && (
           <>
-            <button disabled={ap < 1} onClick={() => dispatch({ type: 'SET_MODE', mode: 'move' })}>
+            <button
+              className={state.actionMode === 'move' ? 'active-mode' : ''}
+              disabled={ap < 1}
+              onClick={() => dispatch({ type: 'SET_MODE', mode: 'move' })}
+            >
               移动
             </button>
-            <button disabled={ap < 1 || !hasTargets} onClick={() => dispatch({ type: 'SET_MODE', mode: 'attack' })}>
+            <button
+              className={state.actionMode === 'attack' ? 'active-mode' : ''}
+              disabled={ap < 1 || !hasTargets}
+              onClick={() => dispatch({ type: 'SET_MODE', mode: 'attack' })}
+            >
               攻击
             </button>
             {selected.type === 'warrior' && (
-              <button disabled={ap < 2 || !hasWarriorTargets} onClick={() => dispatch({ type: 'SET_MODE', mode: 'warrior' })}>
+              <button
+                className={state.actionMode === 'warrior' ? 'active-mode' : ''}
+                disabled={ap < 2 || !hasWarriorTargets}
+                onClick={() => dispatch({ type: 'SET_MODE', mode: 'warrior' })}
+              >
                 战士技能
               </button>
             )}
             {selected.type === 'mage' && (
-              <button disabled={ap < 2 || !hasMageTargets} onClick={() => dispatch({ type: 'SET_MODE', mode: 'mage' })}>
+              <button
+                className={state.actionMode === 'mage' ? 'active-mode' : ''}
+                disabled={ap < 2 || !hasMageTargets}
+                onClick={() => dispatch({ type: 'SET_MODE', mode: 'mage' })}
+              >
                 法师技能
               </button>
             )}

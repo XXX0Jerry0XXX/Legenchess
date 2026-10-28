@@ -39,6 +39,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 button.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
 button.primary:hover { background: #1d4ed8; }
 button.danger { background: var(--red); border-color: var(--red); color: #fff; }
+button.active-mode { background: var(--blue); border-color: var(--blue); color: #fff; }
 
 .app {
   max-width: 1180px;
@@ -179,12 +180,14 @@ button.danger { background: var(--red); border-color: var(--red); color: #fff; }
 
 .piece .stat.atk {
   left: -4px;
-  top: -4px;
+  bottom: -4px;
+  background: #111827;
 }
 
 .piece .stat.hp {
   right: -4px;
   bottom: -4px;
+  background: var(--green);
 }
 .piece .free {
   position: absolute;
