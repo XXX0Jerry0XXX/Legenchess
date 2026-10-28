@@ -1,5 +1,6 @@
 import {
   ATTACK_COST,
+  CHAIRMAN_BONUS,
   COLS,
   MAX_MAGE_TARGETS,
   MOVE_COST,
@@ -397,7 +398,7 @@ export function reducer(state: GameState, action: Action): GameState {
       const next = dealDamage(state, id, action.targetId, { counter: false, targetDamage: 2 });
       return {
         ...next,
-        ap: state.ap - 2,
+        ap: state.ap - SKILL_COST,
         actionMode: 'warrior',
         turnStarted: true,
         clockRunning: true,
@@ -429,7 +430,7 @@ export function reducer(state: GameState, action: Action): GameState {
       }
       return {
         ...next,
-        ap: state.ap - 2,
+        ap: state.ap - SKILL_COST,
         actionMode: 'mage',
         mageTargets: [],
         turnStarted: true,
@@ -570,7 +571,7 @@ export function reducer(state: GameState, action: Action): GameState {
         pieces: clonePieces(state, { [id]: { dead: false, hp: piece.maxHp } }),
         lastTurnDeaths: state.lastTurnDeaths.filter((x) => x !== id),
         previousTurnDeaths: state.previousTurnDeaths.filter((x) => x !== id),
-        ap: state.ap - 2,
+        ap: state.ap - SKILL_COST + (piece.type === 'chairman' ? CHAIRMAN_BONUS : 0),
         actionMode: null,
         pendingRevive: null,
         turnStarted: true,
