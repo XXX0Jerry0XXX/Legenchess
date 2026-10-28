@@ -17,6 +17,9 @@ yarn-debug.log*
 # Test coverage
 coverage/
 
+# Vite cache
+.vite/
+
 # Local environment
 .env
 .env.local
