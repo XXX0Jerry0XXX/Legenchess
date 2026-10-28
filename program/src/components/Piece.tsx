@@ -5,8 +5,9 @@ export function Piece({ piece }: { piece: PieceType }) {
   const def = PIECE_DEFS[piece.type];
   return (
     <div className={`piece ${piece.owner === 0 ? 'a' : 'b'}`}>
+      <span className="stat atk">攻{piece.atk}</span>
       {def.short}
-      <span className="hp">{piece.hp}</span>
+      <span className="stat hp">血{piece.hp}</span>
       {(piece.freeMove || piece.freeAttack) && <span className="free">+</span>}
     </div>
   );

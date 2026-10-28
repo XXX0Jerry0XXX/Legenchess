@@ -445,16 +445,13 @@ export function reducer(state: GameState, action: Action): GameState {
       const id = state.pendingPromotion;
       if (!id || !PROMOTABLE.includes(action.pieceType)) return state;
       const def = PIECE_DEFS[action.pieceType];
-      const piece = state.pieces[id];
-      const damageTaken = piece.maxHp - piece.hp;
-      const hp = Math.max(0, def.hp - damageTaken);
       const next: GameState = {
         ...state,
         pieces: clonePieces(state, {
           [id]: {
             type: action.pieceType,
             maxHp: def.hp,
-            hp,
+            hp: def.hp,
             atk: def.atk,
           },
         }),

@@ -165,17 +165,26 @@ button.danger { background: var(--red); border-color: var(--red); color: #fff; }
 }
 .piece.a { background: linear-gradient(145deg, #2563eb, #1d4ed8); }
 .piece.b { background: linear-gradient(145deg, #dc2626, #b91c1c); }
-.piece .hp {
+.piece .stat {
   position: absolute;
-  right: -3px;
-  bottom: -3px;
-  min-width: 17px;
+  min-width: 20px;
   padding: 1px 3px;
   border-radius: 6px;
   background: #111827;
   color: #fff;
   font-size: 10px;
   text-align: center;
+  line-height: 1;
+}
+
+.piece .stat.atk {
+  left: -4px;
+  top: -4px;
+}
+
+.piece .stat.hp {
+  right: -4px;
+  bottom: -4px;
 }
 .piece .free {
   position: absolute;
