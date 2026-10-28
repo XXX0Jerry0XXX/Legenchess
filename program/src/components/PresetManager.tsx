@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { COLS, ROWS } from '../game/constants';
 import { useGame } from '../state/GameProvider';
 import type { PieceType } from '../game/types';
 
@@ -8,8 +9,8 @@ export function PresetManager() {
 
   const exportPreset = () => {
     const placements: { type: PieceType; r: number; c: number }[] = [];
-    for (let r = 0; r < 10; r += 1) {
-      for (let c = 0; c < 8; c += 1) {
+    for (let r = 0; r < ROWS; r += 1) {
+      for (let c = 0; c < COLS; c += 1) {
         const id = state.board[r][c];
         if (id && state.pieces[id].owner === state.setupOwner) {
           placements.push({ type: state.pieces[id].type, r, c });

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useReducer, type ReactNode } from 'react';
+import { AI_STEP_DELAY_MS, AUTO_SETUP_DELAY_MS, TICK_MS } from '../game/constants';
 import { createInitialState, reducer, type Action } from '../game/reducer';
 import type { GameState } from '../game/types';
 import { hasSave, loadGame, saveGame } from './storage';
@@ -23,19 +24,19 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (state.phase !== 'play' || !state.clockRunning || state.winner) return;
-    const timer = window.setInterval(() => dispatch({ type: 'TICK' }), 1000);
+    const timer = window.setInterval(() => dispatch({ type: 'TICK' }), TICK_MS);
     return () => window.clearInterval(timer);
   }, [state.phase, state.clockRunning, state.winner]);
 
   useEffect(() => {
     if (state.phase !== 'observe') return;
-    const timer = window.setInterval(() => dispatch({ type: 'OBSERVE_TICK' }), 1000);
+    const timer = window.setInterval(() => dispatch({ type: 'OBSERVE_TICK' }), TICK_MS);
     return () => window.clearInterval(timer);
   }, [state.phase]);
 
   useEffect(() => {
     if (state.phase === 'setup' && state.mode === 'ai' && state.setupOwner === state.aiPlayer) {
-      const timer = window.setTimeout(() => dispatch({ type: 'AUTO_SETUP' }), 500);
+      const timer = window.setTimeout(() => dispatch({ type: 'AUTO_SETUP' }), AUTO_SETUP_DELAY_MS);
       return () => window.clearTimeout(timer);
     }
   }, [state.phase, state.mode, state.setupOwner, state.aiPlayer]);
@@ -47,7 +48,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
       state.currentPlayer === state.aiPlayer &&
       !state.winner
     ) {
-      const timer = window.setTimeout(() => dispatch({ type: 'AI_STEP' }), 600);
+      const timer = window.setTimeout(() => dispatch({ type: 'AI_STEP' }), AI_STEP_DELAY_MS);
       return () => window.clearTimeout(timer);
     }
   }, [state]);

@@ -1,4 +1,4 @@
-import { BASE_AP, CHAIRMAN_BONUS, PIECE_DEFS, SECOND_PLAYER_BONUS } from './constants';
+import { BASE_AP, CHAIRMAN_BONUS, COLS, PIECE_DEFS, ROWS, SECOND_PLAYER_BONUS } from './constants';
 import type { GameState, Owner, Piece, PieceType } from './types';
 
 let idCounter = 0;
@@ -24,7 +24,7 @@ export function createPiece(owner: Owner, type: PieceType): Piece {
 }
 
 export function emptyBoard(): (string | null)[][] {
-  return Array.from({ length: 10 }, () => Array<string | null>(8).fill(null));
+  return Array.from({ length: ROWS }, () => Array<string | null>(COLS).fill(null));
 }
 
 export function aliveCount(state: GameState, owner: Owner): number {
@@ -55,4 +55,12 @@ export function checkWinner(state: GameState): Owner | 'draw' | null {
   if (a === 0) return 1;
   if (b === 0) return 0;
   return null;
+}
+
+export function playerLabel(owner: Owner): 'A' | 'B' {
+  return owner === 0 ? 'A' : 'B';
+}
+
+export function opponent(owner: Owner): Owner {
+  return owner === 0 ? 1 : 0;
 }

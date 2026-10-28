@@ -1,4 +1,11 @@
-import { COLS, ROWS, PIECE_DEFS } from './constants';
+import {
+  COLS,
+  PIECE_DEFS,
+  RECT1_RADIUS,
+  RECT2_RADIUS,
+  RING_RADIUS,
+  ROWS,
+} from './constants';
 import type { Cell, GameState, MoveKind, AttackKind } from './types';
 
 export function inBoard(r: number, c: number): boolean {
@@ -7,10 +14,10 @@ export function inBoard(r: number, c: number): boolean {
 
 export function cellsForMoveKind(kind: MoveKind, cell: Cell): Cell[] {
   const out: Cell[] = [];
-  const span = kind === 'rect1' ? 1 : 2;
+  const span = kind === 'rect1' ? RECT1_RADIUS : RECT2_RADIUS;
 
   if (kind === 'cross2') {
-    for (let d = 1; d <= 2; d += 1) {
+    for (let d = 1; d <= RECT2_RADIUS; d += 1) {
       pushIf(out, cell.r - d, cell.c);
       pushIf(out, cell.r + d, cell.c);
       pushIf(out, cell.r, cell.c - d);
@@ -38,9 +45,9 @@ export function rect2Cells(cell: Cell): Cell[] {
 
 export function ring2Cells(cell: Cell): Cell[] {
   const out: Cell[] = [];
-  for (let dr = -2; dr <= 2; dr += 1) {
-    for (let dc = -2; dc <= 2; dc += 1) {
-      if (Math.max(Math.abs(dr), Math.abs(dc)) !== 2) continue;
+  for (let dr = -RING_RADIUS; dr <= RING_RADIUS; dr += 1) {
+    for (let dc = -RING_RADIUS; dc <= RING_RADIUS; dc += 1) {
+      if (Math.max(Math.abs(dr), Math.abs(dc)) !== RING_RADIUS) continue;
       pushIf(out, cell.r + dr, cell.c + dc);
     }
   }

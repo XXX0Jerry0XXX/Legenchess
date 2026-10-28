@@ -1,12 +1,18 @@
 import {
+  ATTACK_COST,
+  COLS,
+  MAX_MAGE_TARGETS,
+  MOVE_COST,
   OBSERVE_TIME,
   PIECE_DEFS,
   PLAYER_TIME,
   PROMOTABLE,
   SETUP_COUNTS,
+  SKILL_COST,
   isPrepCell,
 } from './constants';
-import { aliveCount, checkWinner, computeAp, createPiece, emptyBoard } from './engine';
+import { aliveCount, checkWinner, computeAp, createPiece, emptyBoard, opponent } from './engine';
+import { chooseBeginnerAiActions } from './ai';
 import {
   getAttackCells,
   getMageSkillCells,
@@ -15,9 +21,9 @@ import {
   isInAttackRange,
   pieceCell,
 } from './ranges';
+import { randomSetupPlacements } from './setup';
 import type {
   ActionMode,
-  Cell,
   GameState,
   Owner,
   Piece,
@@ -163,7 +169,7 @@ function dealDamage(
 }
 
 function endTurn(state: GameState): GameState {
-  const currentPlayer = (1 - state.currentPlayer) as Owner;
+  const currentPlayer = opponent(state.currentPlayer);
   const turn = state.turn + 1;
   const next: GameState = {
     ...state,
@@ -209,121 +215,6 @@ function timeoutResult(state: GameState): GameState {
   const b = aliveCount(state, 1);
   const winner = a === b ? 'draw' : a > b ? 0 : 1;
   return { ...state, winner, phase: 'finished', clockRunning: false, turnStarted: false };
-}
-
-function shuffled<T>(items: T[]): T[] {
-  const result = [...items];
-  for (let i = result.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
-
-function emptyPrepCell(state: GameState, owner: Owner): Cell | null {
-  for (let r = 0; r < 10; r += 1) {
-    if (!isPrepCell(owner, r)) continue;
-    for (let c = 0; c < 8; c += 1) {
-      if (state.board[r][c] === null) return { r, c };
-    }
-  }
-  return null;
-}
-
-function randomSetupPlacements(owner: Owner): { type: PieceType; r: number; c: number }[] {
-  const cells: Cell[] = [];
-  for (let r = 0; r < 10; r += 1) {
-    if (!isPrepCell(owner, r)) continue;
-    for (let c = 0; c < 8; c += 1) {
-      cells.push({ r, c });
-    }
-  }
-  const chosenCells = shuffled(cells).slice(0, 16);
-  const types: PieceType[] = [];
-  (Object.keys(SETUP_COUNTS) as PieceType[]).forEach((type) => {
-    for (let i = 0; i < SETUP_COUNTS[type]; i += 1) {
-      types.push(type);
-    }
-  });
-  return shuffled(types).map((type, index) => ({ type, r: chosenCells[index].r, c: chosenCells[index].c }));
-}
-
-function beginnerAiStep(state: GameState): GameState {
-  if (
-    state.phase !== 'play' ||
-    state.mode !== 'ai' ||
-    state.currentPlayer !== state.aiPlayer ||
-    state.winner
-  ) {
-    return state;
-  }
-
-  if (state.pendingPromotion) {
-    return reducer(state, { type: 'CHOOSE_PROMOTION', pieceType: 'warrior' });
-  }
-
-  if (state.ap >= 2) {
-    const deathPool = [...state.lastTurnDeaths, ...state.previousTurnDeaths];
-    const revivable = deathPool.find(
-      (id) =>
-        state.pieces[id]?.owner === state.currentPlayer &&
-        state.pieces[id]?.dead &&
-        state.pieces[id].type !== 'chairman',
-    );
-    if (revivable) {
-      const priest = Object.values(state.pieces).find(
-        (p) => p.owner === state.currentPlayer && !p.dead && p.type === 'priest',
-      );
-      const cell = emptyPrepCell(state, state.currentPlayer);
-      if (priest && cell) {
-        let next = reducer(state, { type: 'SELECT_PIECE', id: priest.id });
-        next = reducer(next, { type: 'SET_MODE', mode: 'revive' });
-        next = reducer(next, { type: 'CHOOSE_REVIVE', id: revivable });
-        next = reducer(next, { type: 'PLACE_REVIVE', r: cell.r, c: cell.c });
-        return next;
-      }
-    }
-  }
-
-  if (state.ap >= 1) {
-    const attackers = shuffled(
-      Object.values(state.pieces).filter(
-        (p) => p.owner === state.currentPlayer && !p.dead,
-      ),
-    );
-    for (const piece of attackers) {
-      const targets = shuffled(getAttackCells(state, piece.id));
-      if (targets.length > 0) {
-        const targetId = state.board[targets[0].r][targets[0].c];
-        if (targetId) {
-          let next = reducer(state, { type: 'SELECT_PIECE', id: piece.id });
-          next = reducer(next, { type: 'SET_MODE', mode: 'attack' });
-          next = reducer(next, { type: 'ATTACK', targetId });
-          return next;
-        }
-      }
-    }
-  }
-
-  if (state.ap >= 1) {
-    const movers = shuffled(
-      Object.values(state.pieces).filter(
-        (p) => p.owner === state.currentPlayer && !p.dead,
-      ),
-    );
-    for (const piece of movers) {
-      const cells = shuffled(getMoveCells(state, piece.id));
-      if (cells.length > 0) {
-        const cell = cells[0];
-        let next = reducer(state, { type: 'SELECT_PIECE', id: piece.id });
-        next = reducer(next, { type: 'SET_MODE', mode: 'move' });
-        next = reducer(next, { type: 'MOVE', r: cell.r, c: cell.c });
-        return next;
-      }
-    }
-  }
-
-  return reducer(state, { type: 'END_TURN' });
 }
 
 export function reducer(state: GameState, action: Action): GameState {
@@ -407,7 +298,7 @@ export function reducer(state: GameState, action: Action): GameState {
 
     case 'MOVE': {
       const id = state.selectedId;
-      if (!id || state.actionMode !== 'move' || state.ap < 1) return state;
+      if (!id || state.actionMode !== 'move' || state.ap < MOVE_COST) return state;
       const from = pieceCell(state, id);
       if (!from) return state;
       if (!getMoveCells(state, id).some((c) => c.r === action.r && c.c === action.c)) return state;
@@ -426,7 +317,7 @@ export function reducer(state: GameState, action: Action): GameState {
 
     case 'ATTACK': {
       const id = state.selectedId;
-      if (!id || state.actionMode !== 'attack' || state.ap < 1) return state;
+      if (!id || state.actionMode !== 'attack' || state.ap < ATTACK_COST) return state;
       if (!getAttackCells(state, id).some((c) => state.board[c.r][c.c] === action.targetId)) return state;
       const next = dealDamage(state, id, action.targetId);
       return {
@@ -440,7 +331,7 @@ export function reducer(state: GameState, action: Action): GameState {
 
     case 'WARRIOR': {
       const id = state.selectedId;
-      if (!id || state.actionMode !== 'warrior' || state.ap < 2) return state;
+      if (!id || state.actionMode !== 'warrior' || state.ap < SKILL_COST) return state;
       if (!getWarriorSkillCells(state, id).some((c) => state.board[c.r][c.c] === action.targetId)) return state;
       const next = dealDamage(state, id, action.targetId, { counter: false, targetDamage: 2 });
       return {
@@ -457,7 +348,7 @@ export function reducer(state: GameState, action: Action): GameState {
       const id = action.id;
       const targets = state.mageTargets.includes(id)
         ? state.mageTargets.filter((x) => x !== id)
-        : state.mageTargets.length < 3
+        : state.mageTargets.length < MAX_MAGE_TARGETS
           ? [...state.mageTargets, id]
           : state.mageTargets;
       return { ...state, mageTargets: targets };
@@ -465,8 +356,8 @@ export function reducer(state: GameState, action: Action): GameState {
 
     case 'CONFIRM_MAGE': {
       const id = state.selectedId;
-      if (!id || state.actionMode !== 'mage' || state.ap < 2) return state;
-      if (state.mageTargets.length < 1 || state.mageTargets.length > 3) return state;
+      if (!id || state.actionMode !== 'mage' || state.ap < SKILL_COST) return state;
+      if (state.mageTargets.length < 1 || state.mageTargets.length > MAX_MAGE_TARGETS) return state;
       const valid = state.mageTargets.every((targetId) =>
         getMageSkillCells(state, id).some((c) => state.board[c.r][c.c] === targetId),
       );
@@ -488,7 +379,7 @@ export function reducer(state: GameState, action: Action): GameState {
     case 'USE_ASSASSIN': {
       const id = state.selectedId;
       const piece = id ? state.pieces[id] : undefined;
-      if (!id || !piece || piece.type !== 'assassin' || state.ap < 2 || piece.freeMove || piece.freeAttack) return state;
+      if (!id || !piece || piece.type !== 'assassin' || state.ap < SKILL_COST || piece.freeMove || piece.freeAttack) return state;
       return {
         ...state,
         pieces: clonePieces(state, { [id]: { freeMove: true, freeAttack: true } }),
@@ -546,7 +437,7 @@ export function reducer(state: GameState, action: Action): GameState {
 
     case 'PLACE_REVIVE': {
       const id = state.pendingRevive;
-      if (!id || state.actionMode !== 'revive' || state.ap < 2) return state;
+      if (!id || state.actionMode !== 'revive' || state.ap < SKILL_COST) return state;
       if (!isPrepCell(state.currentPlayer, action.r) || state.board[action.r][action.c] !== null) return state;
       const piece = state.pieces[id];
       const board = state.board.map((row) => row.slice());
@@ -630,7 +521,7 @@ export function reducer(state: GameState, action: Action): GameState {
       const counts = { ...SETUP_COUNTS };
       const seen = new Set<string>();
       for (const p of action.placements) {
-        if (!isPrepCell(action.owner, p.r) || p.c < 0 || p.c > 7) return state;
+        if (!isPrepCell(action.owner, p.r) || p.c < 0 || p.c >= COLS) return state;
         const key = `${p.r},${p.c}`;
         if (seen.has(key)) return state;
         seen.add(key);
@@ -673,7 +564,7 @@ export function reducer(state: GameState, action: Action): GameState {
       return action.state;
 
     case 'AI_STEP':
-      return beginnerAiStep(state);
+      return chooseBeginnerAiActions(state).reduce((next, action) => reducer(next, action), state);
 
     default:
       return state;

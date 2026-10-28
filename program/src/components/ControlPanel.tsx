@@ -1,4 +1,4 @@
-import { PIECE_DEFS } from '../game/constants';
+import { ATTACK_COST, MAX_MAGE_TARGETS, MOVE_COST, PIECE_DEFS, SKILL_COST } from '../game/constants';
 import { getAttackCells, getMageSkillCells, getWarriorSkillCells } from '../game/ranges';
 import { useGame } from '../state/GameProvider';
 
@@ -34,14 +34,14 @@ export function ControlPanel() {
           <>
             <button
               className={state.actionMode === 'move' ? 'active-mode' : ''}
-              disabled={ap < 1}
+              disabled={ap < MOVE_COST}
               onClick={() => dispatch({ type: 'SET_MODE', mode: 'move' })}
             >
               移动
             </button>
             <button
               className={state.actionMode === 'attack' ? 'active-mode' : ''}
-              disabled={ap < 1 || !hasTargets}
+              disabled={ap < ATTACK_COST || !hasTargets}
               onClick={() => dispatch({ type: 'SET_MODE', mode: 'attack' })}
             >
               攻击
@@ -49,7 +49,7 @@ export function ControlPanel() {
             {selected.type === 'warrior' && (
               <button
                 className={state.actionMode === 'warrior' ? 'active-mode' : ''}
-                disabled={ap < 2 || !hasWarriorTargets}
+                disabled={ap < SKILL_COST || !hasWarriorTargets}
                 onClick={() => dispatch({ type: 'SET_MODE', mode: 'warrior' })}
               >
                 战士技能
@@ -58,14 +58,14 @@ export function ControlPanel() {
             {selected.type === 'mage' && (
               <button
                 className={state.actionMode === 'mage' ? 'active-mode' : ''}
-                disabled={ap < 2 || !hasMageTargets}
+                disabled={ap < SKILL_COST || !hasMageTargets}
                 onClick={() => dispatch({ type: 'SET_MODE', mode: 'mage' })}
               >
                 法师技能
               </button>
             )}
             {selected.type === 'assassin' && !selected.freeMove && !selected.freeAttack && (
-              <button disabled={ap < 2} onClick={() => dispatch({ type: 'USE_ASSASSIN' })}>
+              <button disabled={ap < SKILL_COST} onClick={() => dispatch({ type: 'USE_ASSASSIN' })}>
                 刺客技能
               </button>
             )}
@@ -81,7 +81,7 @@ export function ControlPanel() {
               </button>
             )}
             {selected.type === 'priest' && (
-              <button disabled={ap < 2 || !revivable} onClick={() => dispatch({ type: 'SET_MODE', mode: 'revive' })}>
+              <button disabled={ap < SKILL_COST || !revivable} onClick={() => dispatch({ type: 'SET_MODE', mode: 'revive' })}>
                 牧师技能
               </button>
             )}
@@ -90,7 +90,7 @@ export function ControlPanel() {
 
         {state.actionMode === 'mage' && (
           <>
-            <span>已选 {state.mageTargets.length}/3</span>
+            <span>已选 {state.mageTargets.length}/{MAX_MAGE_TARGETS}</span>
             <button
               className="primary"
               disabled={state.mageTargets.length < 1}

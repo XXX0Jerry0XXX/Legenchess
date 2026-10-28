@@ -108,8 +108,8 @@ export function Board() {
           ? state.pieces[id]
           : null;
       const classes = ['cell'];
-      if (r <= 2) classes.push('prepa');
-      else if (r >= 7) classes.push('prepb');
+      if (isPrepCell(0, r)) classes.push('prepa');
+      else if (isPrepCell(1, r)) classes.push('prepb');
       else classes.push('battle');
       if (selectedCell && sameCell({ r, c }, selectedCell)) classes.push('selected');
       if (isHighlight(r, c)) classes.push('highlight');

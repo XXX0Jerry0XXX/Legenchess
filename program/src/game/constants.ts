@@ -7,6 +7,17 @@ export const CHAIRMAN_BONUS = 4;
 export const SECOND_PLAYER_BONUS = 1;
 export const PLAYER_TIME = 25 * 60;
 export const OBSERVE_TIME = 2 * 60;
+export const MOVE_COST = 1;
+export const ATTACK_COST = 1;
+export const SKILL_COST = 2;
+export const MAX_MAGE_TARGETS = 3;
+export const TOTAL_PIECES_PER_SIDE = 16;
+export const TICK_MS = 1000;
+export const AI_STEP_DELAY_MS = 600;
+export const AUTO_SETUP_DELAY_MS = 500;
+export const RECT1_RADIUS = 1;
+export const RECT2_RADIUS = 2;
+export const RING_RADIUS = 2;
 
 export const PIECE_DEFS: Record<PieceType, PieceDef> = {
   novice: { name: '新手', short: '新', atk: 1, hp: 1, move: 'rect1', attack: 'rect1', skill: 'promote' },
