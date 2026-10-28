@@ -1,12 +1,7 @@
 export type Owner = 0 | 1;
+export type SkillId = string;
 
-export type PieceType =
-  | 'novice'
-  | 'warrior'
-  | 'mage'
-  | 'assassin'
-  | 'priest'
-  | 'chairman';
+export type PieceType = string;
 
 export type MoveKind = 'rect1' | 'rect2' | 'cross2';
 export type AttackKind = 'rect1' | 'cross2';
@@ -19,13 +14,31 @@ export type SkillKind =
   | 'chairman';
 
 export interface PieceDef {
+  type: PieceType;
   name: string;
   short: string;
   atk: number;
   hp: number;
   move: MoveKind;
   attack: AttackKind;
-  skill: SkillKind;
+  skill: SkillId;
+  description?: string;
+  passive?: {
+    onTurnStart?: (state: GameState, pieceId: string) => GameState;
+    onKill?: (state: GameState, pieceId: string, targetId: string) => GameState;
+  };
+}
+
+export interface SkillDefinition {
+  id: SkillId;
+  name: string;
+  description: string;
+  cost: number;
+  targetMode: 'none' | 'single' | 'multi';
+  maxTargets?: number;
+  getTargetCells(state: GameState, pieceId: string): Cell[];
+  canUse(state: GameState, pieceId: string): boolean;
+  apply(state: GameState, pieceId: string, targetIds: string[]): GameState;
 }
 
 export interface Piece {
@@ -53,6 +66,7 @@ export type ActionMode =
   | 'mage'
   | 'assassinMove'
   | 'assassinAttack'
+  | 'skill'
   | 'revive';
 
 export type Winner = Owner | 'draw' | null;
@@ -73,6 +87,7 @@ export interface GameState {
   selectedSetupType: PieceType | null;
   actionMode: ActionMode;
   mageTargets: string[];
+  skillTargets: string[];
   lastTurnDeaths: string[];
   previousTurnDeaths: string[];
   deadThisTurn: string[];

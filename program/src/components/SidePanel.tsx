@@ -1,5 +1,6 @@
 import { PIECE_DEFS } from '../game/constants';
 import { aliveCount } from '../game/engine';
+import { getPiece } from '../game/registry';
 import { useGame } from '../state/GameProvider';
 import type { Owner } from '../game/types';
 
@@ -18,7 +19,7 @@ export function SidePanel({ owner, label }: { owner: Owner; label: string }) {
       <div className="grave">
         {dead.map((p) => (
           <span key={p.id} className="tomb">
-            {PIECE_DEFS[p.type].short}
+            {(getPiece(p.type) ?? PIECE_DEFS[p.type])?.short ?? p.type}
           </span>
         ))}
       </div>

@@ -13,6 +13,7 @@ import {
 } from './constants';
 import { aliveCount, checkWinner, computeAp, createPiece, emptyBoard, opponent } from './engine';
 import { chooseBeginnerAiActions } from './ai';
+import { getPiece, getSkill } from './registry';
 import {
   getAttackCells,
   getMageSkillCells,
@@ -44,6 +45,9 @@ export type Action =
   | { type: 'WARRIOR'; targetId: string }
   | { type: 'TOGGLE_MAGE'; id: string }
   | { type: 'CONFIRM_MAGE' }
+  | { type: 'TOGGLE_SKILL_TARGET'; id: string }
+  | { type: 'CONFIRM_SKILL' }
+  | { type: 'ACTIVATE_SKILL' }
   | { type: 'USE_ASSASSIN' }
   | { type: 'ASSASSIN_MOVE'; r: number; c: number }
   | { type: 'ASSASSIN_ATTACK'; targetId: string }
@@ -81,6 +85,7 @@ export function createInitialState(): GameState {
     selectedSetupType: null,
     actionMode: null,
     mageTargets: [],
+    skillTargets: [],
     lastTurnDeaths: [],
     previousTurnDeaths: [],
     deadThisTurn: [],
@@ -181,6 +186,7 @@ function endTurn(state: GameState): GameState {
     selectedId: null,
     actionMode: null,
     mageTargets: [],
+    skillTargets: [],
     pendingPromotion: null,
     pendingRevive: null,
     clockRunning: true,
@@ -290,11 +296,16 @@ export function reducer(state: GameState, action: Action): GameState {
       if (state.phase !== 'play') return state;
       if (action.id && state.pieces[action.id]?.owner !== state.currentPlayer) return state;
       if (action.id && state.pieces[action.id].dead) return state;
-      return { ...state, selectedId: action.id, actionMode: null, mageTargets: [] };
+      return { ...state, selectedId: action.id, actionMode: null, mageTargets: [], skillTargets: [] };
     }
 
     case 'SET_MODE':
-      return { ...state, actionMode: action.mode, mageTargets: action.mode === 'mage' ? state.mageTargets : [] };
+      return {
+        ...state,
+        actionMode: action.mode,
+        mageTargets: action.mode === 'mage' ? state.mageTargets : [],
+        skillTargets: action.mode === 'skill' ? state.skillTargets : [],
+      };
 
     case 'MOVE': {
       const id = state.selectedId;
@@ -371,6 +382,61 @@ export function reducer(state: GameState, action: Action): GameState {
         ap: state.ap - 2,
         actionMode: 'mage',
         mageTargets: [],
+        turnStarted: true,
+        clockRunning: true,
+      };
+    }
+
+    case 'TOGGLE_SKILL_TARGET': {
+      if (state.actionMode !== 'skill' || !state.selectedId) return state;
+      const piece = state.pieces[state.selectedId];
+      const def = getPiece(piece.type);
+      const skill = def ? getSkill(def.skill) : null;
+      if (!skill) return state;
+      const id = action.id;
+      const max = skill.maxTargets ?? (skill.targetMode === 'multi' ? 3 : 1);
+      const targets = state.skillTargets.includes(id)
+        ? state.skillTargets.filter((x) => x !== id)
+        : state.skillTargets.length < max
+          ? [...state.skillTargets, id]
+          : state.skillTargets;
+      return { ...state, skillTargets: targets };
+    }
+
+    case 'CONFIRM_SKILL': {
+      const id = state.selectedId;
+      if (!id || state.actionMode !== 'skill') return state;
+      const piece = state.pieces[id];
+      const def = getPiece(piece.type);
+      const skill = def ? getSkill(def.skill) : null;
+      if (!skill || !skill.canUse(state, id) || state.ap < skill.cost) return state;
+      const targetIds = state.skillTargets;
+      if (skill.targetMode === 'multi' && targetIds.length < 1) return state;
+      if (skill.targetMode === 'single' && targetIds.length !== 1) return state;
+      const next = skill.apply(state, id, targetIds);
+      return {
+        ...next,
+        ap: state.ap - skill.cost,
+        actionMode: null,
+        skillTargets: [],
+        turnStarted: true,
+        clockRunning: true,
+      };
+    }
+
+    case 'ACTIVATE_SKILL': {
+      const id = state.selectedId;
+      if (!id) return state;
+      const piece = state.pieces[id];
+      const def = getPiece(piece.type);
+      const skill = def ? getSkill(def.skill) : null;
+      if (!skill || skill.targetMode !== 'none' || !skill.canUse(state, id) || state.ap < skill.cost) return state;
+      const next = skill.apply(state, id, []);
+      return {
+        ...next,
+        ap: state.ap - skill.cost,
+        actionMode: null,
+        skillTargets: [],
         turnStarted: true,
         clockRunning: true,
       };

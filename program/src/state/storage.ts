@@ -18,6 +18,7 @@ export function loadGame(): GameState | null {
     if (parsed.mode === undefined) parsed.mode = 'local';
     if (parsed.aiPlayer === undefined) parsed.aiPlayer = null;
     if (parsed.previousTurnDeaths === undefined) parsed.previousTurnDeaths = [];
+    if (parsed.skillTargets === undefined) parsed.skillTargets = [];
     return parsed as GameState;
   } catch {
     return null;

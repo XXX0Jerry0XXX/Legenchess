@@ -1,4 +1,5 @@
 import { ATTACK_COST, MAX_MAGE_TARGETS, MOVE_COST, PIECE_DEFS, SKILL_COST } from '../game/constants';
+import { getPiece } from '../game/registry';
 import { getAttackCells, getMageSkillCells, getWarriorSkillCells } from '../game/ranges';
 import { useGame } from '../state/GameProvider';
 
@@ -24,7 +25,7 @@ export function ControlPanel() {
         </strong>
         {selected ? (
           <span>
-            已选：{PIECE_DEFS[selected.type].name}（HP {selected.hp}/{selected.maxHp}）
+            已选：{(getPiece(selected.type) ?? PIECE_DEFS[selected.type])?.name ?? selected.type}（HP {selected.hp}/{selected.maxHp}）
           </span>
         ) : (
           <span>点击己方棋子选择</span>
@@ -115,7 +116,7 @@ export function ControlPanel() {
                   )
                   .map((id) => (
                     <button key={id} onClick={() => dispatch({ type: 'CHOOSE_REVIVE', id })}>
-                      {PIECE_DEFS[state.pieces[id].type].name}
+                      {(getPiece(state.pieces[id].type) ?? PIECE_DEFS[state.pieces[id].type])?.name ?? state.pieces[id].type}
                     </button>
                   ))}
               </>
