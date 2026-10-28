@@ -19,7 +19,10 @@ export function Board() {
   const selected = state.selectedId ? state.pieces[state.selectedId] : null;
   const selectedCell = selected ? pieceCell(state, selected.id) : null;
 
-  const moveCells = selected && state.actionMode === 'move' ? getMoveCells(state, selected.id) : [];
+  const moveCells =
+    selected && (state.actionMode === 'move' || state.actionMode === 'assassinMove')
+      ? getMoveCells(state, selected.id)
+      : [];
   const attackCells =
     selected && (state.actionMode === 'attack' || state.actionMode === 'assassinAttack')
       ? getAttackCells(state, selected.id)
@@ -37,7 +40,8 @@ export function Board() {
     }
     if (!selected) return false;
     const cell = { r, c };
-    if (state.actionMode === 'move') return moveCells.some((x) => sameCell(x, cell));
+    if (state.actionMode === 'move' || state.actionMode === 'assassinMove')
+      return moveCells.some((x) => sameCell(x, cell));
     if (state.actionMode === 'attack' || state.actionMode === 'assassinAttack')
       return attackCells.some((x) => sameCell(x, cell));
     if (state.actionMode === 'warrior') return warriorCells.some((x) => sameCell(x, cell));
@@ -73,6 +77,8 @@ export function Board() {
     if (selected) {
       if (state.actionMode === 'move') {
         if (isHighlight(r, c)) dispatch({ type: 'MOVE', r, c });
+      } else if (state.actionMode === 'assassinMove') {
+        if (isHighlight(r, c)) dispatch({ type: 'ASSASSIN_MOVE', r, c });
       } else if (state.actionMode === 'attack') {
         if (id && isHighlight(r, c)) dispatch({ type: 'ATTACK', targetId: id });
       } else if (state.actionMode === 'assassinAttack') {
