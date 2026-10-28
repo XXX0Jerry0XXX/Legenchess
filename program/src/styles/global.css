@@ -244,6 +244,25 @@ button.active-mode { background: var(--blue); border-color: var(--blue); color: 
 .modal h2 { margin: 0 0 12px; font-size: 17px; }
 .choice-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
+.rules-text {
+  max-height: 60vh;
+  overflow: auto;
+  padding-right: 6px;
+}
+.rules-text h3 {
+  margin: 14px 0 6px;
+  font-size: 14px;
+}
+.rules-text p,
+.rules-text li {
+  font-size: 13px;
+  line-height: 1.55;
+}
+.rules-text ul {
+  margin: 6px 0;
+  padding-left: 18px;
+}
+
 .start-screen {
   max-width: 460px;
   margin: 60px auto;

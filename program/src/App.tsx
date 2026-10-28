@@ -1,6 +1,7 @@
 import { Board } from './components/Board';
 import { ControlPanel } from './components/ControlPanel';
 import { Modal } from './components/Modal';
+import { RulesButton } from './components/RulesButton';
 import { SetupScreen } from './components/SetupScreen';
 import { SidePanel } from './components/SidePanel';
 import { StartScreen } from './components/StartScreen';
@@ -51,6 +52,7 @@ function Game() {
             B {formatTime(state.times[1])}
           </div>
         </div>
+        <RulesButton />
       </header>
 
       <section className="layout">
