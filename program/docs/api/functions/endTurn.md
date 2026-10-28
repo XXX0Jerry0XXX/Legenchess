@@ -8,8 +8,6 @@
 
 > **endTurn**(`state`): [`GameState`](../interfaces/GameState.md)
 
-Defined in: rules.ts:77
-
 ## Parameters
 
 ### state

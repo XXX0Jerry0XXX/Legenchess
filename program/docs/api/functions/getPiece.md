@@ -8,8 +8,6 @@
 
 > **getPiece**(`type`): [`PieceDef`](../interfaces/PieceDef.md) \| `null`
 
-Defined in: registry.ts:23
-
 ## Parameters
 
 ### type

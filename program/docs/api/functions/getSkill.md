@@ -8,8 +8,6 @@
 
 > **getSkill**(`id`): [`SkillDefinition`](../interfaces/SkillDefinition.md) \| `null`
 
-Defined in: registry.ts:27
-
 ## Parameters
 
 ### id

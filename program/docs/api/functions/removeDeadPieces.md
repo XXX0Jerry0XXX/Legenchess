@@ -8,8 +8,6 @@
 
 > **removeDeadPieces**(`state`): [`GameState`](../interfaces/GameState.md)
 
-Defined in: rules.ts:47
-
 ## Parameters
 
 ### state

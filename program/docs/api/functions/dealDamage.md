@@ -8,8 +8,6 @@
 
 > **dealDamage**(`state`, `attackerId`, `targetId`, `options?`): [`GameState`](../interfaces/GameState.md)
 
-Defined in: rules.ts:22
-
 ## Parameters
 
 ### state

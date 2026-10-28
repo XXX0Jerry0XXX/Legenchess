@@ -8,8 +8,6 @@
 
 > **registerPiece**(`def`): [`PieceDef`](../interfaces/PieceDef.md)
 
-Defined in: registry.ts:13
-
 ## Parameters
 
 ### def

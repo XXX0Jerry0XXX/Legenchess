@@ -8,8 +8,6 @@
 
 > **movePiece**(`state`, `pieceId`, `to`): [`GameState`](../interfaces/GameState.md)
 
-Defined in: rules.ts:13
-
 ## Parameters
 
 ### state

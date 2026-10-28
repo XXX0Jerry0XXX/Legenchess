@@ -8,8 +8,6 @@
 
 > **registerSkill**(`def`): [`SkillDefinition`](../interfaces/SkillDefinition.md)
 
-Defined in: registry.ts:18
-
 ## Parameters
 
 ### def
