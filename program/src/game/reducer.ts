@@ -118,6 +118,11 @@ function removeDead(state: GameState): GameState {
     deadThisTurn: [...state.deadThisTurn, ...deadIds],
   };
   next.winner = checkWinner(next);
+  if (next.winner !== null) {
+    next.phase = 'finished';
+    next.clockRunning = false;
+    next.turnStarted = false;
+  }
   return next;
 }
 
