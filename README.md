@@ -147,7 +147,7 @@ cd program
 npm run docs
 ```
 
-TypeDoc 会从 `src/game/index.ts` 自动生成 Markdown 文档到 `program/docs/api`。命名规范见 `program/docs/naming.md`。
+TypeDoc 会从 `src/game/index.ts` 自动生成 HTML 文档到 `program/docs/api-html`。打开 `program/docs/api-html/index.html` 即可浏览。命名规范见 `program/docs/naming.md`。
 
 ## CI/CD
 

@@ -35,4 +35,4 @@ jobs:
         run: npm run docs
 
       - name: Check API docs are up to date
-        run: git diff --exit-code docs/api
+        run: git diff --exit-code docs/api-html

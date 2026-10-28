@@ -1,7 +1,6 @@
 {
-  "entryPoints": ["src/game/index.ts", "src/game/api.ts"],
-  "out": "docs/api",
-  "plugin": ["typedoc-plugin-markdown"],
+  "entryPoints": ["src/game/index.ts"],
+  "out": "docs/api-html",
   "readme": "none",
   "excludePrivate": true,
   "excludeProtected": true,

@@ -1,9 +1,0 @@
-[**legenchess**](../../README.md)
-
-***
-
-[legenchess](../../README.md) / [index](../README.md) / Action
-
-# Type Alias: Action
-
-> **Action** = \{ `aiPlayer?`: [`Owner`](Owner.md) \| `null`; `firstPlayer`: [`Owner`](Owner.md); `mode?`: [`GameState`](../interfaces/GameState.md)\[`"mode"`\]; `type`: `"START_SETUP"`; \} \| \{ `pieceType`: [`PieceType`](PieceType.md) \| `null`; `type`: `"SELECT_SETUP"`; \} \| \{ `c`: `number`; `r`: `number`; `type`: `"PLACE_SETUP"`; \} \| \{ `c`: `number`; `r`: `number`; `type`: `"UNDO_SETUP"`; \} \| \{ `type`: `"NEXT_SETUP"`; \} \| \{ `type`: `"START_PLAY"`; \} \| \{ `id`: `string` \| `null`; `type`: `"SELECT_PIECE"`; \} \| \{ `mode`: [`ActionMode`](ActionMode.md); `type`: `"SET_MODE"`; \} \| \{ `c`: `number`; `r`: `number`; `type`: `"MOVE"`; \} \| \{ `targetId`: `string`; `type`: `"ATTACK"`; \} \| \{ `targetId`: `string`; `type`: `"WARRIOR"`; \} \| \{ `id`: `string`; `type`: `"TOGGLE_MAGE"`; \} \| \{ `type`: `"CONFIRM_MAGE"`; \} \| \{ `id`: `string`; `type`: `"TOGGLE_SKILL_TARGET"`; \} \| \{ `type`: `"CONFIRM_SKILL"`; \} \| \{ `type`: `"ACTIVATE_SKILL"`; \} \| \{ `actions`: [`GameAction`](GameAction.md)[]; `type`: `"APPLY_GAME_ACTIONS"`; \} \| \{ `type`: `"USE_ASSASSIN"`; \} \| \{ `c`: `number`; `r`: `number`; `type`: `"ASSASSIN_MOVE"`; \} \| \{ `targetId`: `string`; `type`: `"ASSASSIN_ATTACK"`; \} \| \{ `id`: `string`; `type`: `"CHOOSE_REVIVE"`; \} \| \{ `c`: `number`; `r`: `number`; `type`: `"PLACE_REVIVE"`; \} \| \{ `pieceType`: [`PieceType`](PieceType.md); `type`: `"CHOOSE_PROMOTION"`; \} \| \{ `type`: `"END_TURN"`; \} \| \{ `type`: `"TICK"`; \} \| \{ `type`: `"OBSERVE_TICK"`; \} \| \{ `owner`: [`Owner`](Owner.md); `type`: `"RESIGN"`; \} \| \{ `type`: `"AUTO_SETUP"`; \} \| \{ `type`: `"AI_STEP"`; \} \| \{ `owner`: [`Owner`](Owner.md); `placements`: `object`[]; `type`: `"IMPORT_PRESET"`; \} \| \{ `state`: [`GameState`](../interfaces/GameState.md); `type`: `"RESTORE"`; \}
