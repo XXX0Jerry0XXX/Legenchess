@@ -117,7 +117,7 @@ button.active-mode { background: var(--blue); border-color: var(--blue); color: 
 .board {
   display: grid;
   grid-template-columns: repeat(8, 56px);
-  grid-template-rows: repeat(12, 56px);
+  grid-template-rows: repeat(10, 56px);
   gap: 2px;
   background: #8b7b5a;
   border: 6px solid #6d5f45;
@@ -277,6 +277,6 @@ button.active-mode { background: var(--blue); border-color: var(--blue); color: 
 @media (max-width: 920px) {
   .layout { grid-template-columns: 1fr; }
   .side { display: none; }
-  .board { grid-template-columns: repeat(8, 42px); grid-template-rows: repeat(12, 42px); }
+  .board { grid-template-columns: repeat(8, 42px); grid-template-rows: repeat(10, 42px); }
   .piece { width: 34px; height: 34px; font-size: 14px; }
 }
