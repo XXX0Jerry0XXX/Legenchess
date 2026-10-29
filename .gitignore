@@ -31,3 +31,6 @@ coverage/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+#others
+规则_origin.md
