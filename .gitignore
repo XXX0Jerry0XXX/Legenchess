@@ -31,3 +31,10 @@ coverage/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# RL build and training cache
+.rl/
+__pycache__/
+*.pyc
+.venv/
+training/runs/

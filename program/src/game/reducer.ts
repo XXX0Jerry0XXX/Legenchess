@@ -31,9 +31,10 @@ import { handleMovement } from './actions/movement';
 import { handleFlow } from './actions/flow';
 import {
   dealDamage as rulesDealDamage,
-  endTurn as rulesEndTurn,
-  movePiece as rulesMovePiece,
-  removeDeadPieces as rulesRemoveDeadPieces,
+  endTurn,
+  clonePieces,
+  applyGameAction,
+  removeDeadPieces as removeDead,
 } from './rules';
 import type {
   Action,
@@ -45,101 +46,13 @@ import type {
   PieceType,
 } from './types';
 
-function clonePieces(state: GameState, updates: Record<string, Partial<Piece>>): GameState['pieces'] {
-  const pieces = { ...state.pieces };
-  for (const [id, patch] of Object.entries(updates)) {
-    pieces[id] = { ...pieces[id], ...patch };
-  }
-  return pieces;
-}
-
-function removeDead(state: GameState): GameState {
-  const pieces = { ...state.pieces };
-  const board = state.board.map((row) => row.slice());
-  const deadIds: string[] = [];
-
-  for (const id of Object.keys(pieces)) {
-    if (pieces[id].hp <= 0 && !pieces[id].dead) {
-      pieces[id] = { ...pieces[id], dead: true };
-      deadIds.push(id);
-    }
-  }
-
-  for (const id of deadIds) {
-    for (let r = 0; r < board.length; r += 1) {
-      for (let c = 0; c < board[r].length; c += 1) {
-        if (board[r][c] === id) board[r][c] = null;
-      }
-    }
-  }
-
-  const next: GameState = {
-    ...state,
-    pieces,
-    board,
-    deadThisTurn: [...state.deadThisTurn, ...deadIds],
-  };
-  next.winner = checkWinner(next);
-  if (next.winner !== null) {
-    next.phase = 'finished';
-    next.clockRunning = false;
-    next.turnStarted = false;
-  }
-  return next;
-}
-
 function dealDamage(
   state: GameState,
   attackerId: string,
   targetId: string,
-  options: { counter?: boolean; counterImmune?: boolean; attackerDamage?: number; targetDamage?: number } = {},
+  options: Parameters<typeof rulesDealDamage>[3] = {},
 ): GameState {
-  const attacker = state.pieces[attackerId];
-  const target = state.pieces[targetId];
-  if (!attacker || !target) return state;
-
-  const targetDamage = options.targetDamage ?? attacker.atk;
-  let attackerDamage = options.attackerDamage ?? 0;
-  if (options.counter !== false && !options.counterImmune && isInAttackRange(state, targetId, attackerId)) {
-    attackerDamage = target.atk;
-  }
-
-  const pieces = clonePieces(state, {
-    [attackerId]: { hp: attacker.hp - attackerDamage },
-    [targetId]: { hp: target.hp - targetDamage },
-  });
-
-  let pendingPromotion = state.pendingPromotion;
-  if (attacker.type === 'novice' && pieces[targetId].hp <= 0) {
-    pendingPromotion = attackerId;
-  }
-
-  const next: GameState = { ...state, pieces, pendingPromotion };
-  if (pendingPromotion) return next;
-  return removeDead(next);
-}
-
-function endTurn(state: GameState): GameState {
-  const currentPlayer = opponent(state.currentPlayer);
-  const turn = state.turn + 1;
-  const next: GameState = {
-    ...state,
-    currentPlayer,
-    turn,
-    previousTurnDeaths: state.lastTurnDeaths,
-    lastTurnDeaths: state.deadThisTurn,
-    deadThisTurn: [],
-    selectedId: null,
-    actionMode: null,
-    mageTargets: [],
-    skillTargets: [],
-    pendingPromotion: null,
-    pendingRevive: null,
-    clockRunning: true,
-    turnStarted: true,
-  };
-  next.ap = computeAp(next);
-  return next;
+  return removeDead(rulesDealDamage(state, attackerId, targetId, options));
 }
 
 function startPlay(state: GameState): GameState {
@@ -162,45 +75,6 @@ function startPlay(state: GameState): GameState {
   return next;
 }
 
-function applyGameAction(state: GameState, action: GameAction): GameState {
-  switch (action.type) {
-    case 'dealDamage': {
-      const damaged = rulesDealDamage(state, action.attackerId, action.targetId, {
-        counterImmune: action.counterImmune,
-        targetDamage: action.amount,
-      });
-      return rulesRemoveDeadPieces(damaged);
-    }
-    case 'heal': {
-      const piece = state.pieces[action.pieceId];
-      if (!piece) return state;
-      return {
-        ...state,
-        pieces: clonePieces(state, {
-          [action.pieceId]: { hp: Math.min(piece.maxHp, piece.hp + action.amount) },
-        }),
-      };
-    }
-    case 'move':
-      return rulesMovePiece(state, action.pieceId, action.to);
-    case 'revive': {
-      const piece = state.pieces[action.pieceId];
-      if (!piece) return state;
-      const board = state.board.map((row) => row.slice());
-      board[action.to.r][action.to.c] = action.pieceId;
-      return {
-        ...state,
-        board,
-        pieces: clonePieces(state, { [action.pieceId]: { dead: false, hp: piece.maxHp } }),
-      };
-    }
-    case 'endTurn':
-      return rulesEndTurn(state);
-    default:
-      return state;
-  }
-}
-
 function timeoutResult(state: GameState): GameState {
   const a = aliveCount(state, 0);
   const b = aliveCount(state, 1);
@@ -209,6 +83,8 @@ function timeoutResult(state: GameState): GameState {
 }
 
 export function reducer(state: GameState, action: Action): GameState {
+  if (state.phase === 'finished' && action.type !== 'START_SETUP' && action.type !== 'RESTORE') return state;
+  if (state.pendingPromotion && !['CHOOSE_PROMOTION', 'APPLY_ACTIONS', 'TICK', 'RESTORE', 'START_SETUP'].includes(action.type)) return state;
   switch (action.type) {
     case 'START_SETUP':
       return {
@@ -328,7 +204,7 @@ export function reducer(state: GameState, action: Action): GameState {
 
     case 'WARRIOR': {
       const id = state.selectedId;
-      if (!id || state.actionMode !== 'warrior' || state.ap < SKILL_COST) return state;
+      if (!id || state.pieces[id]?.type !== 'warrior' || state.actionMode !== 'warrior' || state.ap < SKILL_COST) return state;
       if (!getWarriorSkillCells(state, id).some((c) => state.board[c.r][c.c] === action.targetId)) return state;
       const next = dealDamage(state, id, action.targetId, { counter: false, targetDamage: 2 });
       return {
@@ -353,7 +229,7 @@ export function reducer(state: GameState, action: Action): GameState {
 
     case 'CONFIRM_MAGE': {
       const id = state.selectedId;
-      if (!id || state.actionMode !== 'mage' || state.ap < SKILL_COST) return state;
+      if (!id || state.pieces[id]?.type !== 'mage' || state.actionMode !== 'mage' || state.ap < SKILL_COST) return state;
       if (state.mageTargets.length < 1 || state.mageTargets.length > MAX_MAGE_TARGETS) return state;
       const valid = state.mageTargets.every((targetId) =>
         getMageSkillCells(state, id).some((c) => state.board[c.r][c.c] === targetId),

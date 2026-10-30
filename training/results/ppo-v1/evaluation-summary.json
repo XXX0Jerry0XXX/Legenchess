@@ -1,0 +1,136 @@
+{
+  "initial": {
+    "steps": 0,
+    "rulesVersion": "legenchess-8x12-ppo-v1",
+    "seed": 900000,
+    "secondsPerDecision": 10,
+    "maxDecisions": 1024,
+    "fullBoardOnly": true,
+    "pairedSides": true,
+    "stochastic": false,
+    "summaries": [
+      {
+        "opponent": "beginner",
+        "games": 200,
+        "wins": 0,
+        "losses": 163,
+        "draws": 37,
+        "truncated": 0,
+        "completion_rate": 1.0,
+        "score": 0.0925,
+        "win_rate": 0.0,
+        "win_rate_wilson95": [
+          0.0,
+          0.018846005918320894
+        ],
+        "mean_decisions": 292.405,
+        "baseline_fallbacks": 0,
+        "seconds": 30.02
+      },
+      {
+        "opponent": "expert",
+        "games": 200,
+        "wins": 0,
+        "losses": 65,
+        "draws": 135,
+        "truncated": 0,
+        "completion_rate": 1.0,
+        "score": 0.3375,
+        "win_rate": 0.0,
+        "win_rate_wilson95": [
+          0.0,
+          0.018846005918320894
+        ],
+        "mean_decisions": 177.185,
+        "baseline_fallbacks": 0,
+        "seconds": 30.02
+      },
+      {
+        "opponent": "tactical",
+        "games": 200,
+        "wins": 0,
+        "losses": 200,
+        "draws": 0,
+        "truncated": 0,
+        "completion_rate": 1.0,
+        "score": 0.0,
+        "win_rate": 0.0,
+        "win_rate_wilson95": [
+          0.0,
+          0.018846005918320894
+        ],
+        "mean_decisions": 201.895,
+        "baseline_fallbacks": 0,
+        "seconds": 23.84
+      }
+    ],
+    "checkpoint": "initial.pt"
+  },
+  "latest": {
+    "steps": 131072,
+    "rulesVersion": "legenchess-8x12-ppo-v1",
+    "seed": 900000,
+    "secondsPerDecision": 10,
+    "maxDecisions": 1024,
+    "fullBoardOnly": true,
+    "pairedSides": true,
+    "stochastic": false,
+    "summaries": [
+      {
+        "opponent": "beginner",
+        "games": 200,
+        "wins": 168,
+        "losses": 5,
+        "draws": 27,
+        "truncated": 0,
+        "completion_rate": 1.0,
+        "score": 0.9075,
+        "win_rate": 0.84,
+        "win_rate_wilson95": [
+          0.7828581380609876,
+          0.8843265779145542
+        ],
+        "mean_decisions": 231.125,
+        "baseline_fallbacks": 0,
+        "seconds": 23.88
+      },
+      {
+        "opponent": "expert",
+        "games": 200,
+        "wins": 161,
+        "losses": 0,
+        "draws": 39,
+        "truncated": 0,
+        "completion_rate": 1.0,
+        "score": 0.9025,
+        "win_rate": 0.805,
+        "win_rate_wilson95": [
+          0.744558352034882,
+          0.8539455843549424
+        ],
+        "mean_decisions": 223.575,
+        "baseline_fallbacks": 0,
+        "seconds": 25.44
+      },
+      {
+        "opponent": "tactical",
+        "games": 200,
+        "wins": 194,
+        "losses": 2,
+        "draws": 4,
+        "truncated": 0,
+        "completion_rate": 1.0,
+        "score": 0.98,
+        "win_rate": 0.97,
+        "win_rate_wilson95": [
+          0.9361048802675267,
+          0.9861798741692518
+        ],
+        "mean_decisions": 227.49,
+        "baseline_fallbacks": 0,
+        "seconds": 23.91
+      }
+    ],
+    "checkpoint": "latest.pt"
+  }
+}

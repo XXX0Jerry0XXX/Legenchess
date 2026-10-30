@@ -2,13 +2,14 @@ import { resumeGame, useGame } from '../state/GameProvider';
 import { useState } from 'react';
 import { Modal } from './Modal';
 import { RulesButton } from './RulesButton';
+import type { AiLevel } from '../game/types';
 
 export function StartScreen() {
   const { dispatch, canResume } = useGame();
   const [showAiMenu, setShowAiMenu] = useState(false);
   const [showLocalMenu, setShowLocalMenu] = useState(false);
 
-  const startAi = (aiLevel: 'beginner' | 'expert', humanOwner: 0 | 1) => {
+  const startAi = (aiLevel: AiLevel, humanOwner: 0 | 1) => {
     dispatch({
       type: 'START_SETUP',
       firstPlayer: humanOwner === 0 ? 0 : 0,
@@ -75,6 +76,10 @@ export function StartScreen() {
             <button onClick={() => startAi('expert', 1)}>
               高手 · 我后手
             </button>
+          </div>
+          <div className="choice-row">
+            <button onClick={() => startAi('ppo', 0)}>PPO 实验版 · 我先手</button>
+            <button onClick={() => startAi('ppo', 1)}>PPO 实验版 · 我后手</button>
           </div>
           <div className="choice-row">
             <button onClick={() => setShowAiMenu(false)}>取消</button>

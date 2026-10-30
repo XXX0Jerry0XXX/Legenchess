@@ -1,7 +1,8 @@
 import type { PieceDef, PieceType, Owner } from './types';
 
-export const ROWS = 10;
+export const ROWS = 12;
 export const COLS = 8;
+export const PREP_ROWS = 3;
 export const BASE_AP = 2;
 export const CHAIRMAN_BONUS = 4;
 export const SECOND_PLAYER_BONUS = 1;
@@ -40,7 +41,8 @@ export const SETUP_COUNTS: Record<PieceType, number> = {
 export const PROMOTABLE: PieceType[] = ['warrior', 'mage', 'assassin', 'priest'];
 
 export function prepRows(owner: Owner): number[] {
-  return owner === 0 ? [0, 1, 2] : [7, 8, 9];
+  const start = owner === 0 ? 0 : ROWS - PREP_ROWS;
+  return Array.from({ length: PREP_ROWS }, (_, index) => start + index);
 }
 
 export function isPrepCell(owner: Owner, r: number): boolean {

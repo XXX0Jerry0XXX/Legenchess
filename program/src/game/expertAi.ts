@@ -25,16 +25,17 @@ function evaluate(state: GameState, aiPlayer: 0 | 1): number {
   return score;
 }
 
-export function chooseExpertAiActions(state: GameState, apply: (s: GameState, a: Action) => GameState): Action[] {
-  if (state.phase !== 'play' || state.currentPlayer !== state.aiPlayer || state.winner) return [];
+export function chooseExpertAiActions(state: GameState, apply: (s: GameState, a: Action) => GameState, random: () => number = Math.random): Action[] {
+  const shuffle = <T>(items: T[]): T[] => shuffled(items, random);
+  if (state.phase !== 'play' || state.currentPlayer !== state.aiPlayer || state.winner !== null) return [];
   if (state.pendingPromotion) return [{ type: 'CHOOSE_PROMOTION', pieceType: 'warrior' }];
 
   const ai = state.aiPlayer;
-  const own = shuffled(Object.values(state.pieces).filter((p) => p.owner === ai && !p.dead));
+  const own = shuffle(Object.values(state.pieces).filter((p) => p.owner === ai && !p.dead));
   const candidates: Action[][] = [];
 
   for (const piece of own) {
-    const attackTargets = shuffled(getAttackCells(state, piece.id));
+    const attackTargets = shuffle(getAttackCells(state, piece.id));
     for (const target of attackTargets) {
       const targetId = state.board[target.r][target.c];
       if (targetId) {
@@ -46,7 +47,7 @@ export function chooseExpertAiActions(state: GameState, apply: (s: GameState, a:
       }
     }
 
-    const moveCells = shuffled(getMoveCells(state, piece.id)).slice(0, 10);
+    const moveCells = shuffle(getMoveCells(state, piece.id)).slice(0, 10);
     for (const cell of moveCells) {
       candidates.push([
         { type: 'SELECT_PIECE', id: piece.id },
@@ -61,7 +62,7 @@ export function chooseExpertAiActions(state: GameState, apply: (s: GameState, a:
     if (!skill) continue;
 
     if (def.type === 'warrior' && state.ap >= 2) {
-      for (const cell of shuffled(getWarriorSkillCells(state, piece.id)).slice(0, 3)) {
+      for (const cell of shuffle(getWarriorSkillCells(state, piece.id)).slice(0, 3)) {
         const targetId = state.board[cell.r][cell.c];
         if (targetId) {
           candidates.push([
@@ -74,7 +75,7 @@ export function chooseExpertAiActions(state: GameState, apply: (s: GameState, a:
     }
 
     if (def.type === 'mage' && state.ap >= 2) {
-      for (const cell of shuffled(getMageSkillCells(state, piece.id)).slice(0, 3)) {
+      for (const cell of shuffle(getMageSkillCells(state, piece.id)).slice(0, 3)) {
         const targetId = state.board[cell.r][cell.c];
         if (targetId) {
           candidates.push([
