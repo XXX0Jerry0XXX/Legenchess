@@ -1,0 +1,54 @@
+{
+  "steps": 131072,
+  "updates": 64,
+  "training_seconds": 254.24,
+  "completed_training_games": 1684,
+  "training_opponents": {
+    "tactical": 917,
+    "random": 435,
+    "snapshot": 332
+  },
+  "training_scenarios": {
+    "skirmish": 926,
+    "full": 758
+  },
+  "parameter_change_l2": 8.061894674651063,
+  "max_export_error": 7.628605205312056e-07,
+  "model_sha256": "ed9f1ee3245a67a59e02ceb8824623769985ded617e1ac265ec6833ca2b864e2",
+  "model_bytes": 334586,
+  "parameters": 16258,
+  "browser": {
+    "browser": "141.0.7390.37",
+    "rulesVersion": "legenchess-8x12-ppo-v1",
+    "modelSteps": 131072,
+    "subdirectoryDeployment": true,
+    "boardCells": 96,
+    "rows": 12,
+    "columns": 8,
+    "mobileViewport": "390x844",
+    "slowModelMilliseconds": 2200,
+    "firstMoveMilliseconds": 2922,
+    "modelRequests": 1,
+    "firstDecision": {
+      "kind": "move",
+      "pieceId": "piece-1",
+      "to": {
+        "r": 4,
+        "c": 5
+      }
+    },
+    "exactPytorchExportedMove": true,
+    "clockContinuedDuringLoad": true,
+    "missingModelFallbackWorked": true,
+    "pageErrors": []
+  },
+  "resume": {
+    "source_steps": 131072,
+    "resumed_steps": 131200,
+    "resumed_updates": 66,
+    "additional_decisions": 128,
+    "device": "cpu",
+    "metrics_header_valid": true,
+    "published_model_steps": 131072
+  }
+}

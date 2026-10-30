@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { ROWS } from './constants';
 import { createPiece, computeAp } from './engine';
 import { emptyBoard } from './engine';
 import { createInitialState, reducer } from './reducer';
@@ -31,13 +32,14 @@ describe('牧师复活', () => {
     warrior.dead = true;
     state.pieces = { [priest.id]: priest, [warrior.id]: warrior };
     state.board = emptyBoard();
-    state.board[7][0] = priest.id;
+    state.board[ROWS - 1][0] = priest.id;
     state.lastTurnDeaths = [warrior.id];
 
     state = reducer(state, { type: 'SELECT_PIECE', id: priest.id });
     state = reducer(state, { type: 'SET_MODE', mode: 'revive' });
     state = reducer(state, { type: 'CHOOSE_REVIVE', id: warrior.id });
-    state = reducer(state, { type: 'PLACE_REVIVE', r: 7, c: 1 });
+    expect(reducer(state, { type: 'PLACE_REVIVE', r: 8, c: 1 })).toBe(state);
+    state = reducer(state, { type: 'PLACE_REVIVE', r: ROWS - 1, c: 1 });
     expect(state.pieces[warrior.id].dead).toBe(false);
 
     state = {
@@ -52,7 +54,7 @@ describe('牧师复活', () => {
     state = reducer(state, { type: 'SELECT_PIECE', id: priest.id });
     state = reducer(state, { type: 'SET_MODE', mode: 'revive' });
     state = reducer(state, { type: 'CHOOSE_REVIVE', id: warrior.id });
-    state = reducer(state, { type: 'PLACE_REVIVE', r: 7, c: 2 });
+    state = reducer(state, { type: 'PLACE_REVIVE', r: ROWS - 1, c: 2 });
     expect(state.pieces[warrior.id].dead).toBe(false);
   });
 });

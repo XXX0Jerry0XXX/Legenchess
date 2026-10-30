@@ -4,12 +4,13 @@ import type { Action } from './types';
 import { shuffled, emptyPrepCell } from './setup';
 import type { GameState } from './types';
 
-export function chooseBeginnerAiActions(state: GameState): Action[] {
+export function chooseBeginnerAiActions(state: GameState, random: () => number = Math.random): Action[] {
+  const shuffle = <T>(items: T[]): T[] => shuffled(items, random);
   if (
     state.phase !== 'play' ||
     state.mode !== 'ai' ||
     state.currentPlayer !== state.aiPlayer ||
-    state.winner
+    state.winner !== null
   ) {
     return [];
   }
@@ -42,13 +43,13 @@ export function chooseBeginnerAiActions(state: GameState): Action[] {
   }
 
   if (state.ap >= ATTACK_COST) {
-    const attackers = shuffled(
+    const attackers = shuffle(
       Object.values(state.pieces).filter(
         (p) => p.owner === state.currentPlayer && !p.dead,
       ),
     );
     for (const piece of attackers) {
-      const targets = shuffled(getAttackCells(state, piece.id));
+      const targets = shuffle(getAttackCells(state, piece.id));
       if (targets.length > 0) {
         const targetId = state.board[targets[0].r][targets[0].c];
         if (targetId) {
@@ -63,13 +64,13 @@ export function chooseBeginnerAiActions(state: GameState): Action[] {
   }
 
   if (state.ap >= MOVE_COST) {
-    const movers = shuffled(
+    const movers = shuffle(
       Object.values(state.pieces).filter(
         (p) => p.owner === state.currentPlayer && !p.dead,
       ),
     );
     for (const piece of movers) {
-      const cells = shuffled(getMoveCells(state, piece.id));
+      const cells = shuffle(getMoveCells(state, piece.id));
       if (cells.length > 0) {
         const cell = cells[0];
         return [

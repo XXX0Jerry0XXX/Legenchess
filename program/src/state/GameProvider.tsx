@@ -3,6 +3,7 @@ import { AI_STEP_DELAY_MS, AUTO_SETUP_DELAY_MS, TICK_MS } from '../game/constant
 import { createInitialState, reducer } from '../game/reducer';
 import type { Action } from '../game/types';
 import { chooseAiActions } from '../game/ai/runner';
+import { choosePpoActions } from '../game/ai/ppoClient';
 import type { GameState } from '../game/types';
 import { hasSave, loadGame, saveGame } from './storage';
 
@@ -25,7 +26,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [state]);
 
   useEffect(() => {
-    if (state.phase !== 'play' || !state.clockRunning || state.winner) return;
+    if (state.phase !== 'play' || !state.clockRunning || state.winner !== null) return;
     const timer = window.setInterval(() => dispatch({ type: 'TICK' }), TICK_MS);
     return () => window.clearInterval(timer);
   }, [state.phase, state.clockRunning, state.winner]);
@@ -48,15 +49,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
       state.phase === 'play' &&
       state.mode === 'ai' &&
       state.currentPlayer === state.aiPlayer &&
-      !state.winner
+      state.winner === null
     ) {
+      let cancelled = false;
       const timer = window.setTimeout(() => {
+        if (state.aiLevel === 'ppo') {
+          choosePpoActions(state).then((actions) => {
+            if (!cancelled) dispatch({ type: 'APPLY_ACTIONS', actions });
+          }).catch(() => {
+            if (!cancelled) dispatch({ type: 'AI_STEP' });
+          });
+          return;
+        }
         const actions = chooseAiActions(state, reducer);
         dispatch({ type: 'APPLY_ACTIONS', actions });
       }, AI_STEP_DELAY_MS);
-      return () => window.clearTimeout(timer);
+      return () => { cancelled = true; window.clearTimeout(timer); };
     }
-  }, [state]);
+  // A clock tick leaves the position legal and must not cancel model loading.
+  }, [state.phase, state.mode, state.currentPlayer, state.aiPlayer, state.aiLevel, state.board,
+    state.pieces, state.ap, state.turn, state.pendingPromotion, state.lastTurnDeaths,
+    state.previousTurnDeaths, state.deadThisTurn]);
 
   return <GameContext.Provider value={{ state, dispatch, canResume }}>{children}</GameContext.Provider>;
 }

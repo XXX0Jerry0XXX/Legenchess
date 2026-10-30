@@ -51,6 +51,7 @@ export function dealDamage(
 }
 
 export function removeDeadPieces(state: GameState): GameState {
+  if (state.pendingPromotion) return state;
   const pieces = { ...state.pieces };
   const board = state.board.map((row) => row.slice());
   const deadIds: string[] = [];
@@ -86,10 +87,14 @@ export function removeDeadPieces(state: GameState): GameState {
 }
 
 export function endTurn(state: GameState): GameState {
+  if (state.phase !== 'play' || state.winner !== null || state.pendingPromotion) return state;
   const currentPlayer = opponent(state.currentPlayer);
   const turn = state.turn + 1;
   const next: GameState = {
     ...state,
+    pieces: Object.fromEntries(Object.entries(state.pieces).map(([id, piece]) => [id,
+      piece.freeMove || piece.freeAttack ? { ...piece, freeMove: false, freeAttack: false } : piece,
+    ])),
     currentPlayer,
     turn,
     previousTurnDeaths: state.lastTurnDeaths,

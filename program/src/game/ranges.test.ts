@@ -17,4 +17,12 @@ describe('范围裁剪', () => {
   it('5x5 环形共 16 格', () => {
     expect(ring2Cells({ r: 4, c: 4 })).toHaveLength(16);
   });
+
+  it('新增的右下角可达，范围在第 12 行和第 8 列边缘裁剪', () => {
+    expect(cellsForMoveKind('rect1', { r: 11, c: 7 })).toEqual([
+      { r: 10, c: 6 },
+      { r: 10, c: 7 },
+      { r: 11, c: 6 },
+    ]);
+  });
 });

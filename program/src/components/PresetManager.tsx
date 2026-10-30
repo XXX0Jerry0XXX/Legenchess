@@ -1,11 +1,13 @@
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { COLS, ROWS } from '../game/constants';
+import { readSetupPreset } from '../game/presets';
 import { useGame } from '../state/GameProvider';
 import type { PieceType } from '../game/types';
 
 export function PresetManager() {
   const { state, dispatch } = useGame();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const exportPreset = () => {
     const placements: { type: PieceType; r: number; c: number }[] = [];
@@ -17,7 +19,7 @@ export function PresetManager() {
         }
       }
     }
-    const blob = new Blob([JSON.stringify({ name: 'legenchess-preset', placements }, null, 2)], {
+    const blob = new Blob([JSON.stringify({ name: 'legenchess-preset', board: { rows: ROWS, cols: COLS }, placements }, null, 2)], {
       type: 'application/json',
     });
     const url = URL.createObjectURL(blob);
@@ -29,15 +31,21 @@ export function PresetManager() {
   };
 
   const importPreset = async (file: File) => {
-    const text = await file.text();
-    const data = JSON.parse(text) as { placements: { type: PieceType; r: number; c: number }[] };
-    dispatch({ type: 'IMPORT_PRESET', owner: state.setupOwner, placements: data.placements });
+    try {
+      const data: unknown = JSON.parse(await file.text());
+      const placements = readSetupPreset(data, state.setupOwner);
+      dispatch({ type: 'IMPORT_PRESET', owner: state.setupOwner, placements });
+      setError(null);
+    } catch {
+      setError('无法导入布阵：请选择包含完整 16 枚棋子的有效布阵 JSON 文件。');
+    }
   };
 
   return (
     <div className="action-list">
       <button onClick={exportPreset}>导出当前布阵 JSON</button>
       <button onClick={() => fileRef.current?.click()}>导入布阵 JSON</button>
+      {error && <span role="alert">{error}</span>}
       <input
         ref={fileRef}
         type="file"

@@ -98,7 +98,7 @@ export type Cell = { r: number; c: number };
 
 export type Phase = 'start' | 'setup' | 'observe' | 'play' | 'finished';
 export type GameMode = 'local' | 'ai';
-export type AiLevel = 'beginner' | 'expert';
+export type AiLevel = 'beginner' | 'expert' | 'ppo';
 
 export type ActionMode =
   | null

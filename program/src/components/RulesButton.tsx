@@ -1,11 +1,12 @@
 import { useState } from 'react';
+import { COLS, PREP_ROWS, ROWS } from '../game/constants';
 import { Modal } from './Modal';
 
 function RulesContent() {
   return (
     <div className="rules-text">
       <h3>游戏进行</h3>
-      <p>双方约定先后手，然后各自在己方 8×3 备战区摆放 16 枚棋子，每格最多 1 枚。摆棋时用隔板遮挡。</p>
+      <p>双方约定先后手，然后各自在己方 {COLS}×{PREP_ROWS} 备战区摆放 16 枚棋子，每格最多 1 枚。摆棋时用隔板遮挡。</p>
       <p>双方轮流进行回合。每回合开始，行动方获得 2 AP；若己方会长未死亡，额外获得 4 AP。后手棋手在己方第一个回合额外获得 1 AP。</p>
       <p>每枚棋子每回合可行动多次，可消耗 AP 进行移动、攻击或释放技能。AP 耗尽或主动放弃后结束回合。</p>
 
@@ -46,7 +47,7 @@ function RulesContent() {
       </ul>
 
       <h3>棋盘</h3>
-      <p>棋盘为 8×10。靠近每名棋手的 8×3 区域为备战区，中间 8×4 区域为交战区。</p>
+      <p>棋盘为 {COLS}×{ROWS}。靠近每名棋手的 {COLS}×{PREP_ROWS} 区域为备战区，中间 {COLS}×{ROWS - 2 * PREP_ROWS} 区域为交战区。</p>
     </div>
   );
 }

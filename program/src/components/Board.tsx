@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { ROWS, COLS, isPrepCell } from '../game/constants';
 import {
   getAttackCells,
@@ -143,5 +144,6 @@ export function Board() {
     }
   }
 
-  return <div className="board">{cells}</div>;
+  const boardStyle = { '--board-rows': ROWS, '--board-cols': COLS } as CSSProperties;
+  return <div className="board" style={boardStyle}>{cells}</div>;
 }
