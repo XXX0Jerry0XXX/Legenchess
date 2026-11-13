@@ -12,7 +12,7 @@ export const BUILTIN_SKILLS: SkillDefinition[] = [
     canUse: (state, pieceId) => state.ap >= 2 && getWarriorSkillCells(state, pieceId).length > 0,
     getActions: (_state, pieceId, targetIds) =>
       targetIds[0]
-        ? [{ type: 'dealDamage', attackerId: pieceId, targetId: targetIds[0], amount: 2, counterImmune: true }]
+        ? [{ type: 'dealDamage', attackerId: pieceId, targetId: targetIds[0], amount: 4, counterImmune: true }]
         : [],
   },
   {

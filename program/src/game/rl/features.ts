@@ -86,7 +86,7 @@ export function encodeCandidates(state: GameState, decisions: Decision[]): numbe
     let killed = 0;
     d.targets?.forEach((id, i) => {
       const target = state.pieces[id], cell = canonical(positions.get(id)!, owner);
-      const damage = d.kind === 'mage' || d.kind === 'warrior' ? 2 : p.atk;
+      const damage = d.kind === 'warrior' ? 4 : d.kind === 'mage' ? 2 : p.atk;
       f[29] += Math.max(0, target.hp) / 12;
       f[30] += Math.min(damage, Math.max(0, target.hp)) / 9;
       if (damage >= target.hp) { f[31] += 1 / 3; f[32] += PIECE_VALUES[target.type] / 18; killed++; }

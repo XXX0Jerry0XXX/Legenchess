@@ -206,7 +206,7 @@ export function reducer(state: GameState, action: Action): GameState {
       const id = state.selectedId;
       if (!id || state.pieces[id]?.type !== 'warrior' || state.actionMode !== 'warrior' || state.ap < SKILL_COST) return state;
       if (!getWarriorSkillCells(state, id).some((c) => state.board[c.r][c.c] === action.targetId)) return state;
-      const next = dealDamage(state, id, action.targetId, { counter: false, targetDamage: 2 });
+      const next = dealDamage(state, id, action.targetId, { counter: false, targetDamage: 4 });
       return {
         ...next,
         ap: state.ap - SKILL_COST,
