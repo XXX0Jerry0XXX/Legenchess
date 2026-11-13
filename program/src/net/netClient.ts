@@ -12,10 +12,13 @@ export type AppMessage =
   | { kind: 'state'; state: GameState }
   | { kind: 'action'; action: Action };
 
-function normalizeUrl(address: string): string {
-  const trimmed = address.replace(/^https?:\/\//, '').replace(/\/+$/, '');
-  const hasPort = /:\d+$/.test(trimmed);
-  return `ws://${trimmed}${hasPort ? '' : ':8088'}`;
+function normalizeHost(address: string): string {
+  let host = address.replace(/^https?:\/\//, '').replace(/^ws:\/\//, '').replace(/\/+$/, '');
+  if (!/:\d+$/.test(host)) {
+    const port = typeof location !== 'undefined' && location.port ? location.port : '5173';
+    host = `${host}:${port}`;
+  }
+  return host;
 }
 
 export class LanClient {
@@ -39,8 +42,8 @@ export class LanClient {
 
   private open(address?: string, room?: string): void {
     this.close();
-    const host = address?.trim() || (typeof location !== 'undefined' ? location.hostname : '127.0.0.1');
-    const ws = new WebSocket(normalizeUrl(host));
+    const host = address?.trim() || (typeof location !== 'undefined' ? location.host : '127.0.0.1:5173');
+    const ws = new WebSocket(`ws://${normalizeHost(host)}/lan`);
     this.socket = ws;
     this.onStatus('connecting');
     ws.onopen = () => {

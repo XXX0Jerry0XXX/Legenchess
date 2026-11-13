@@ -12,10 +12,9 @@ function generateCode() {
   return code;
 }
 
-export function createLanRelay(port = 8088, host = '0.0.0.0') {
+export function attachLanRelay(server, path) {
   const rooms = new Map();
-  const server = createServer();
-  const wss = new WebSocketServer({ server });
+  const wss = new WebSocketServer({ noServer: true });
 
   const send = (socket, payload) => {
     if (socket.readyState === WebSocket.OPEN) socket.send(JSON.stringify(payload));
@@ -87,6 +86,21 @@ export function createLanRelay(port = 8088, host = '0.0.0.0') {
     socket.on('close', () => closeRoom(socket));
     socket.on('error', () => {});
   });
+
+  server.on('upgrade', (req, socket, head) => {
+    if (path) {
+      const pathname = new URL(req.url ?? '', 'http://localhost').pathname;
+      if (pathname !== path) return;
+    }
+    wss.handleUpgrade(req, socket, head, (ws) => wss.emit('connection', ws, req));
+  });
+
+  return wss;
+}
+
+export function createLanRelay(port = 8088, host = '0.0.0.0') {
+  const server = createServer();
+  const wss = attachLanRelay(server);
 
   return new Promise((resolve) => {
     server.listen(port, host, () => {

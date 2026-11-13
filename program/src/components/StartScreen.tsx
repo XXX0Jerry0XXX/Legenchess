@@ -1,5 +1,5 @@
 import { resumeGame, useGame } from '../state/GameProvider';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal } from './Modal';
 import { RulesButton } from './RulesButton';
 import type { AiLevel } from '../game/types';
@@ -13,6 +13,15 @@ export function StartScreen() {
   const [showLanMenu, setShowLanMenu] = useState(false);
   const [lanAddress, setLanAddress] = useState('');
   const [lanRoom, setLanRoom] = useState('');
+  const [hostIps, setHostIps] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (role !== 'host') return;
+    fetch('/lan/ips')
+      .then((response) => response.json())
+      .then((data) => setHostIps((data.ips as string[]) ?? []))
+      .catch(() => {});
+  }, [role]);
 
   const startAi = (aiLevel: AiLevel, humanOwner: 0 | 1) => {
     dispatch({
@@ -99,13 +108,13 @@ export function StartScreen() {
           {error && <p role="alert">{error}</p>}
           {!role && (
             <>
-              <p>主机先运行 <code>npm run lan:server</code>，创建房间后让对方按 IP 与房间码加入。</p>
+              <p>创建房间后，把房间码与连接地址告诉对方，对方填写地址与房间码即可加入。</p>
               <div className="choice-row">
                 <button className="primary" onClick={createRoom}>创建房间（主机）</button>
               </div>
               <div className="choice-row">
                 <input
-                  placeholder="主机地址，如 192.168.1.10"
+                  placeholder="主机地址:端口，如 192.168.1.10:5173"
                   value={lanAddress}
                   onChange={(event) => setLanAddress(event.target.value)}
                 />
@@ -127,6 +136,9 @@ export function StartScreen() {
           {role === 'host' && (
             <>
               <p>房间码：<strong>{room}</strong></p>
+              {hostIps.length > 0 && (
+                <p>连接地址：{hostIps.map((ip) => `${ip}:${location.port || '5173'}`).join('、')}</p>
+              )}
               <p>{peerConnected ? '对手已连接。' : '等待对手加入…'}</p>
               <div className="choice-row">
                 <button
