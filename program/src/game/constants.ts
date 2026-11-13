@@ -21,12 +21,12 @@ export const RECT2_RADIUS = 2;
 export const RING_RADIUS = 2;
 
 export const PIECE_DEFS: Record<PieceType, PieceDef> = {
-  novice: { type: 'novice', name: '新手', short: '新', atk: 1, hp: 1, move: 'rect1', attack: 'rect1', skill: 'promote' },
-  warrior: { type: 'warrior', name: '战士', short: '战', atk: 2, hp: 4, move: 'cross2', attack: 'cross2', skill: 'warrior' },
-  mage: { type: 'mage', name: '法师', short: '法', atk: 2, hp: 1, move: 'rect1', attack: 'rect1', skill: 'mage' },
-  assassin: { type: 'assassin', name: '刺客', short: '刺', atk: 3, hp: 1, move: 'rect2', attack: 'rect1', skill: 'assassin' },
-  priest: { type: 'priest', name: '牧师', short: '牧', atk: 1, hp: 3, move: 'rect1', attack: 'rect1', skill: 'priest' },
-  chairman: { type: 'chairman', name: '会长', short: '会', atk: 3, hp: 3, move: 'rect1', attack: 'rect1', skill: 'chairman' },
+  novice: { type: 'novice', name: 'piece.novice.name', short: 'piece.novice.short', atk: 1, hp: 1, move: 'rect1', attack: 'rect1', skill: 'promote' },
+  warrior: { type: 'warrior', name: 'piece.warrior.name', short: 'piece.warrior.short', atk: 2, hp: 4, move: 'cross2', attack: 'cross2', skill: 'warrior' },
+  mage: { type: 'mage', name: 'piece.mage.name', short: 'piece.mage.short', atk: 2, hp: 1, move: 'rect1', attack: 'rect1', skill: 'mage' },
+  assassin: { type: 'assassin', name: 'piece.assassin.name', short: 'piece.assassin.short', atk: 3, hp: 1, move: 'rect2', attack: 'rect1', skill: 'assassin' },
+  priest: { type: 'priest', name: 'piece.priest.name', short: 'piece.priest.short', atk: 1, hp: 3, move: 'rect1', attack: 'rect1', skill: 'priest' },
+  chairman: { type: 'chairman', name: 'piece.chairman.name', short: 'piece.chairman.short', atk: 3, hp: 3, move: 'rect1', attack: 'rect1', skill: 'chairman' },
 };
 
 export const SETUP_COUNTS: Record<PieceType, number> = {

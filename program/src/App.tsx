@@ -10,6 +10,7 @@ import { createInitialState } from './game/reducer';
 import { GameProvider, useGame } from './state/GameProvider';
 import { LanProvider, useLan } from './net/LanContext';
 import { canAct, localOwnerOf } from './net/perspective';
+import { t } from './i18n';
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -31,16 +32,16 @@ function Game() {
     return <StartScreen />;
   }
 
-  const ownerName = (owner: 0 | 1) => (owner === state.firstPlayer ? '先手方' : '后手方');
+  const ownerName = (owner: 0 | 1) => t(owner === state.firstPlayer ? 'common.firstPlayer' : 'common.secondPlayer');
 
   const phaseLabel =
     state.phase === 'setup'
-      ? `${ownerName(state.setupOwner)} 布阵`
+      ? t('phase.setup', { owner: ownerName(state.setupOwner) })
       : state.phase === 'observe'
-        ? '双方观察'
+        ? t('phase.observe')
         : state.phase === 'finished'
-          ? '对局结束'
-          : `${ownerName(state.currentPlayer)} 回合`;
+          ? t('phase.finished')
+          : t('phase.turn', { owner: ownerName(state.currentPlayer) });
 
   const round = state.turn > 0 ? Math.ceil(state.turn / 2) : 0;
 
@@ -49,11 +50,11 @@ function Game() {
       <header className="topbar">
         <div className="brand">
           <span className="brand-mark">L</span>
-          <h1>传奇棋</h1>
+          <h1>{t('app.title')}</h1>
         </div>
         <div className="turn-info">
           <strong>{phaseLabel}</strong>
-          {state.phase === 'play' && <span>第 {round} 轮 · 回合 {state.turn}</span>}
+          {state.phase === 'play' && <span>{t('round.turn', { round, turn: state.turn })}</span>}
         </div>
         <div className="clocks">
           <div className={`clock ${state.phase === 'play' && state.currentPlayer === 0 ? 'active' : ''}`}>
@@ -78,30 +79,29 @@ function Game() {
       {state.phase === 'play' && <ControlPanel />}
 
       {state.phase === 'observe' && (
-        <Modal title="双方观察布局">
+        <Modal title={t('observe.title')}>
           <p>
-            先手方为 {ownerName(state.firstPlayer)}。双方可在 {formatTime(state.observationRemaining)}{' '}
-            内查看棋盘，先手方可在计时结束前开始第一回合。
+            {t('observe.text', { owner: ownerName(state.firstPlayer), time: formatTime(state.observationRemaining) })}
           </p>
           <div className="choice-row">
             {canActNow ? (
               <button className="primary" onClick={() => dispatch({ type: 'START_PLAY' })}>
-                开始第一回合
+                {t('observe.start')}
               </button>
             ) : (
-              <span>等待先手方开始第一回合…</span>
+              <span>{t('observe.waiting')}</span>
             )}
           </div>
         </Modal>
       )}
 
       {state.pendingPromotion && state.phase !== 'finished' && canActNow && (
-        <Modal title="新手转职">
-          <p>请选择转职方向：</p>
+        <Modal title={t('promotion.title')}>
+          <p>{t('promotion.prompt')}</p>
           <div className="choice-row">
             {PROMOTABLE.map((type) => (
-              <button key={type} onClick={() => dispatch({ type: 'CHOOSE_PROMOTION', pieceType: type })}>
-                {PIECE_DEFS[type].name}
+              <button key={type} className="primary" onClick={() => dispatch({ type: 'CHOOSE_PROMOTION', pieceType: type })}>
+                {t(PIECE_DEFS[type].name)}
               </button>
             ))}
           </div>
@@ -109,15 +109,15 @@ function Game() {
       )}
 
       {state.phase === 'finished' && state.winner !== null && (
-        <Modal title="对局结束">
+        <Modal title={t('finish.title')}>
           <p>
             {state.winner === 'draw'
-              ? '平局。'
-              : `${ownerName(state.winner)} 获胜。`}
+              ? t('finish.draw')
+              : t('finish.win', { owner: ownerName(state.winner) })}
           </p>
           <div className="choice-row">
             <button className="primary" onClick={backToMenu}>
-              返回主菜单
+              {t('finish.back')}
             </button>
           </div>
         </Modal>

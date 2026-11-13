@@ -1,53 +1,54 @@
 import { useState } from 'react';
 import { COLS, PREP_ROWS, ROWS } from '../game/constants';
 import { Modal } from './Modal';
+import { t } from '../i18n';
 
 function RulesContent() {
   return (
     <div className="rules-text">
-      <h3>游戏进行</h3>
-      <p>双方约定先后手，然后各自在己方 {COLS}×{PREP_ROWS} 备战区摆放 16 枚棋子，每格最多 1 枚。摆棋时用隔板遮挡。</p>
-      <p>双方轮流进行回合。每回合开始，行动方获得 2 AP；若己方会长未死亡，额外获得 4 AP。后手棋手在己方第一个回合额外获得 1 AP。</p>
-      <p>每枚棋子每回合可行动多次，可消耗 AP 进行移动、攻击或释放技能。AP 耗尽或主动放弃后结束回合。</p>
+      <h3>{t('rules.game.heading')}</h3>
+      <p>{t('rules.game.setup', { cols: COLS, prep: PREP_ROWS })}</p>
+      <p>{t('rules.game.turns')}</p>
+      <p>{t('rules.game.actions')}</p>
 
-      <h3>胜利与时限</h3>
+      <h3>{t('rules.win.heading')}</h3>
       <ul>
-        <li>使对方全部棋子死亡者获胜。</li>
-        <li>对方投降并被我方接受者获胜。</li>
-        <li>双方最后棋子同一次互相攻击中同时死亡，判平局。</li>
-        <li>任一方 25 分钟计时用尽时，按剩余棋子数量判胜负，数量相同则平局。</li>
+        <li>{t('rules.win.eliminate')}</li>
+        <li>{t('rules.win.resign')}</li>
+        <li>{t('rules.win.mutual')}</li>
+        <li>{t('rules.win.timeout')}</li>
       </ul>
-      <p>先手方首次行动后开始计时；之后行动方在自己的回合内计时。</p>
+      <p>{t('rules.win.clock')}</p>
 
-      <h3>范围定义</h3>
+      <h3>{t('rules.range.heading')}</h3>
       <ul>
-        <li>3×3 矩形：周围 8 格。</li>
-        <li>5×5 矩形：周围 24 格。</li>
-        <li>5×5 十字：同行同列、距离不超过 2 的 8 格。</li>
-        <li>5×5 环形：5×5 正方形最外圈 16 格。</li>
-        <li>范围超出棋盘边界的部分直接截断。</li>
+        <li>{t('rules.range.rect3')}</li>
+        <li>{t('rules.range.rect5')}</li>
+        <li>{t('rules.range.cross5')}</li>
+        <li>{t('rules.range.ring5')}</li>
+        <li>{t('rules.range.clip')}</li>
       </ul>
-      <p>移动和攻击均不会被其他棋子阻挡，只看目标是否在范围内。</p>
+      <p>{t('rules.range.block')}</p>
 
-      <h3>行动</h3>
+      <h3>{t('rules.action.heading')}</h3>
       <ul>
-        <li>移动：1 AP，移动到范围内空格。</li>
-        <li>攻击：1 AP，对攻击范围内 1 个敌人造成 ATK 伤害；若自身也在目标攻击范围内，双方同时结算伤害。</li>
-        <li>技能：默认 2 AP。</li>
-      </ul>
-
-      <h3>棋子</h3>
-      <ul>
-        <li>新手：1/1，3×3 移动与攻击。击杀敌人后由己方选择转职为战士、法师、刺客或牧师，转职后恢复满状态。</li>
-        <li>战士：2/4，5×5 十字移动与攻击。技能对 5×5 矩形内 1 个敌人造成 2 点伤害。</li>
-        <li>法师：2/1，3×3 移动与攻击。技能对 5×5 环形上 1~3 个不同敌人各造成 2 点伤害。</li>
-        <li>刺客：3/1，5×5 矩形移动、3×3 攻击。技能消耗 2 AP，获得 1 次免费移动和 1 次不触发反击的免费攻击。</li>
-        <li>牧师：1/3，3×3 移动与攻击。技能复活最近一个回合内阵亡的 1 枚己方棋子到备战区空位。</li>
-        <li>会长：3/3，3×3 移动与攻击。己方回合开始时或该棋子被复活时，额外获得 4 AP，自动触发。</li>
+        <li>{t('rules.action.move')}</li>
+        <li>{t('rules.action.attack')}</li>
+        <li>{t('rules.action.skill')}</li>
       </ul>
 
-      <h3>棋盘</h3>
-      <p>棋盘为 {COLS}×{ROWS}。靠近每名棋手的 {COLS}×{PREP_ROWS} 区域为备战区，中间 {COLS}×{ROWS - 2 * PREP_ROWS} 区域为交战区。</p>
+      <h3>{t('rules.piece.heading')}</h3>
+      <ul>
+        <li>{t('rules.piece.novice')}</li>
+        <li>{t('rules.piece.warrior')}</li>
+        <li>{t('rules.piece.mage')}</li>
+        <li>{t('rules.piece.assassin')}</li>
+        <li>{t('rules.piece.priest')}</li>
+        <li>{t('rules.piece.chairman')}</li>
+      </ul>
+
+      <h3>{t('rules.board.heading')}</h3>
+      <p>{t('rules.board.desc', { cols: COLS, rows: ROWS, prep: PREP_ROWS, battle: ROWS - 2 * PREP_ROWS })}</p>
     </div>
   );
 }
@@ -57,13 +58,13 @@ export function RulesButton() {
 
   return (
     <>
-      <button onClick={() => setOpen(true)}>规则</button>
+      <button onClick={() => setOpen(true)}>{t('rules.button')}</button>
       {open && (
-        <Modal title="游戏规则">
+        <Modal title={t('rules.title')}>
           <RulesContent />
           <div className="choice-row">
-            <button className="primary" onClick={() => setOpen(false)}>
-              关闭
+            <button onClick={() => setOpen(false)}>
+              {t('common.close')}
             </button>
           </div>
         </Modal>

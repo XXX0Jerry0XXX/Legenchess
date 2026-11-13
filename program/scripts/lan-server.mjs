@@ -42,7 +42,7 @@ export function attachLanRelay(server, path) {
       try {
         message = JSON.parse(String(raw));
       } catch {
-        send(socket, { op: 'error', message: '消息格式无效' });
+        send(socket, { op: 'error', code: 'bad_message', message: '消息格式无效' });
         return;
       }
       switch (message.op) {
@@ -60,7 +60,7 @@ export function attachLanRelay(server, path) {
           const room = String(message.room ?? '').toUpperCase();
           const pair = rooms.get(room);
           if (!pair || pair.length >= 2) {
-            send(socket, { op: 'error', message: '房间不存在或已满' });
+            send(socket, { op: 'error', code: 'room_not_found', message: '房间不存在或已满' });
             return;
           }
           pair.push(socket);
@@ -80,7 +80,7 @@ export function attachLanRelay(server, path) {
           closeRoom(socket);
           break;
         default:
-          send(socket, { op: 'error', message: '未知操作' });
+          send(socket, { op: 'error', code: 'unknown_op', message: '未知操作' });
       }
     });
     socket.on('close', () => closeRoom(socket));

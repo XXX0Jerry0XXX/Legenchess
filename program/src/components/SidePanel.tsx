@@ -3,6 +3,7 @@ import { aliveCount } from '../game/engine';
 import { getPiece } from '../game/registry';
 import { useGame } from '../state/GameProvider';
 import type { Owner } from '../game/types';
+import { t } from '../i18n';
 
 export function SidePanel({ owner, label }: { owner: Owner; label: string }) {
   const { state } = useGame();
@@ -13,13 +14,13 @@ export function SidePanel({ owner, label }: { owner: Owner; label: string }) {
     <aside className="side">
       <div className="player-name">{label}</div>
       <div className="stats">
-        存活 {alive.length} 枚
-        {state.phase === 'play' && <span> · 会长 {alive.some((p) => p.type === 'chairman') ? '在场' : '已阵亡'}</span>}
+        {t('side.alive', { count: alive.length })}
+        {state.phase === 'play' && <span> · {t('piece.chairman.name')} {alive.some((p) => p.type === 'chairman') ? t('side.chairmanPresent') : t('side.chairmanDead')}</span>}
       </div>
       <div className="grave">
         {dead.map((p) => (
           <span key={p.id} className="tomb">
-            {(getPiece(p.type) ?? PIECE_DEFS[p.type])?.short ?? p.type}
+            {t((getPiece(p.type) ?? PIECE_DEFS[p.type])?.short ?? p.type)}
           </span>
         ))}
       </div>

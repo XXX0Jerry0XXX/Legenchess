@@ -39,7 +39,9 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 button.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
 button.primary:hover { background: #1d4ed8; }
 button.danger { background: var(--red); border-color: var(--red); color: #fff; }
+button.danger:hover { background: #b91c1c; }
 button.active-mode { background: var(--blue); border-color: var(--blue); color: #fff; }
+button.active-mode:hover { background: #1d4ed8; }
 
 .app {
   max-width: 1180px;

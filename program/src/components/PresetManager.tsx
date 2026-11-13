@@ -3,6 +3,7 @@ import { COLS, ROWS } from '../game/constants';
 import { readSetupPreset } from '../game/presets';
 import { useGame } from '../state/GameProvider';
 import type { PieceType } from '../game/types';
+import { t } from '../i18n';
 
 export function PresetManager() {
   const { state, dispatch } = useGame();
@@ -37,14 +38,14 @@ export function PresetManager() {
       dispatch({ type: 'IMPORT_PRESET', owner: state.setupOwner, placements });
       setError(null);
     } catch {
-      setError('无法导入布阵：请选择包含完整 16 枚棋子的有效布阵 JSON 文件。');
+      setError(t('preset.importError'));
     }
   };
 
   return (
     <div className="action-list">
-      <button onClick={exportPreset}>导出当前布阵 JSON</button>
-      <button onClick={() => fileRef.current?.click()}>导入布阵 JSON</button>
+      <button onClick={exportPreset}>{t('preset.export')}</button>
+      <button onClick={() => fileRef.current?.click()}>{t('preset.import')}</button>
       {error && <span role="alert">{error}</span>}
       <input
         ref={fileRef}

@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { LanClient, type AppMessage, type LanStatus } from './netClient';
+import { t } from '../i18n';
 
 export type LanRole = 'host' | 'guest' | null;
 
@@ -17,6 +18,12 @@ interface LanContextValue {
 }
 
 const LanContext = createContext<LanContextValue | null>(null);
+
+const LAN_ERROR_KEYS: Record<string, string> = {
+  bad_message: 'lan.error.badMessage',
+  room_not_found: 'lan.error.roomNotFound',
+  unknown_op: 'lan.error.unknownOp',
+};
 
 export function LanProvider({ children }: { children: ReactNode }) {
   const clientRef = useRef<LanClient | null>(null);
@@ -46,11 +53,16 @@ export function LanProvider({ children }: { children: ReactNode }) {
         setPeerConnected(op.status === 'joined');
         setStatus(op.status === 'joined' ? 'ready' : 'disconnected');
       } else if (op.op === 'error') {
-        setError(op.message);
+        const key = op.code ? LAN_ERROR_KEYS[op.code] : null;
+        setError(key ? t(key) : op.message);
         setStatus('error');
       }
     };
   }, [client]);
+
+  useEffect(() => {
+    if (status === 'error' && !error) setError(t('lan.error.connectionFailed'));
+  }, [status, error]);
 
   const value = useMemo<LanContextValue>(() => ({
     role,

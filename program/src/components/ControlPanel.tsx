@@ -4,6 +4,7 @@ import { getAttackCells, getMageSkillCells, getWarriorSkillCells } from '../game
 import { useGame } from '../state/GameProvider';
 import { useLan } from '../net/LanContext';
 import { canAct, localOwnerOf } from '../net/perspective';
+import { t } from '../i18n';
 
 export function ControlPanel() {
   const { state, dispatch } = useGame();
@@ -30,7 +31,7 @@ export function ControlPanel() {
     return (
       <section className="control-panel">
         <div className="action-list">
-          <strong>等待对方行动</strong>
+          <strong>{t('control.waiting')}</strong>
         </div>
       </section>
     );
@@ -40,14 +41,14 @@ export function ControlPanel() {
     <section className="control-panel">
       <div className="action-list">
         <strong>
-          {isFirst ? '先手方' : '后手方'} 回合 · AP {ap}
+          {t('control.turn', { owner: t(isFirst ? 'common.firstPlayer' : 'common.secondPlayer'), ap })}
         </strong>
         {selected ? (
           <span>
-            已选：{(getPiece(selected.type) ?? PIECE_DEFS[selected.type])?.name ?? selected.type}（HP {selected.hp}/{selected.maxHp}）
+            {t('control.selected', { name: t((getPiece(selected.type) ?? PIECE_DEFS[selected.type])?.name ?? selected.type), hp: selected.hp, maxHp: selected.maxHp })}
           </span>
         ) : (
-          <span>点击己方棋子选择</span>
+          <span>{t('control.selectHint')}</span>
         )}
 
         {selected && (
@@ -57,14 +58,14 @@ export function ControlPanel() {
               disabled={ap < MOVE_COST}
               onClick={() => dispatch({ type: 'SET_MODE', mode: 'move' })}
             >
-              移动
+              {t('control.move')}
             </button>
             <button
               className={state.actionMode === 'attack' ? 'active-mode' : ''}
               disabled={ap < ATTACK_COST || !hasTargets}
               onClick={() => dispatch({ type: 'SET_MODE', mode: 'attack' })}
             >
-              攻击
+              {t('control.attack')}
             </button>
             {selected.type === 'warrior' && (
               <button
@@ -72,7 +73,7 @@ export function ControlPanel() {
                 disabled={ap < SKILL_COST || !hasWarriorTargets}
                 onClick={() => dispatch({ type: 'SET_MODE', mode: 'warrior' })}
               >
-                战士技能
+                {t('skill.warrior.name')}
               </button>
             )}
             {selected.type === 'mage' && (
@@ -81,28 +82,28 @@ export function ControlPanel() {
                 disabled={ap < SKILL_COST || !hasMageTargets}
                 onClick={() => dispatch({ type: 'SET_MODE', mode: 'mage' })}
               >
-                法师技能
+                {t('skill.mage.name')}
               </button>
             )}
             {selected.type === 'assassin' && !selected.freeMove && !selected.freeAttack && (
               <button disabled={ap < SKILL_COST} onClick={() => dispatch({ type: 'USE_ASSASSIN' })}>
-                刺客技能
+                {t('skill.assassin.name')}
               </button>
             )}
             {selected.type === 'assassin' && selected.freeMove && (
-              <button onClick={() => dispatch({ type: 'SET_MODE', mode: 'assassinMove' })}>免费移动</button>
+              <button onClick={() => dispatch({ type: 'SET_MODE', mode: 'assassinMove' })}>{t('control.freeMove')}</button>
             )}
             {selected.type === 'assassin' && selected.freeAttack && (
               <button
                 disabled={!hasTargets}
                 onClick={() => dispatch({ type: 'SET_MODE', mode: 'assassinAttack' })}
               >
-                免费攻击
+                {t('control.freeAttack')}
               </button>
             )}
             {selected.type === 'priest' && (
               <button disabled={ap < SKILL_COST || !revivable} onClick={() => dispatch({ type: 'SET_MODE', mode: 'revive' })}>
-                牧师技能
+                {t('skill.priest.name')}
               </button>
             )}
             {selectedSkill && !isBuiltinSkill && selectedSkill.targetMode === 'none' && (
@@ -110,7 +111,7 @@ export function ControlPanel() {
                 disabled={ap < selectedSkill.cost || !selectedSkill.canUse(state, selected.id)}
                 onClick={() => dispatch({ type: 'ACTIVATE_SKILL' })}
               >
-                技能
+                {t('control.skill')}
               </button>
             )}
             {selectedSkill && !isBuiltinSkill && selectedSkill.targetMode !== 'none' && (
@@ -119,7 +120,7 @@ export function ControlPanel() {
                 disabled={ap < selectedSkill.cost}
                 onClick={() => dispatch({ type: 'SET_MODE', mode: 'skill' })}
               >
-                技能
+                {t('control.skill')}
               </button>
             )}
           </>
@@ -127,13 +128,13 @@ export function ControlPanel() {
 
         {state.actionMode === 'mage' && (
           <>
-            <span>已选 {state.mageTargets.length}/{MAX_MAGE_TARGETS}</span>
+            <span>{t('control.selectedCount', { count: state.mageTargets.length, max: MAX_MAGE_TARGETS })}</span>
             <button
               className="primary"
               disabled={state.mageTargets.length < 1}
               onClick={() => dispatch({ type: 'CONFIRM_MAGE' })}
             >
-              确认施法
+              {t('control.confirmMage')}
             </button>
           </>
         )}
@@ -141,7 +142,7 @@ export function ControlPanel() {
         {state.actionMode === 'skill' && selectedSkill && selectedSkill.targetMode !== 'none' && (
           <>
             <span>
-              已选 {state.skillTargets.length}/{selectedSkill.maxTargets ?? (selectedSkill.targetMode === 'multi' ? 3 : 1)}
+              {t('control.selectedCount', { count: state.skillTargets.length, max: selectedSkill.maxTargets ?? (selectedSkill.targetMode === 'multi' ? 3 : 1) })}
             </span>
             <button
               className="primary"
@@ -151,7 +152,7 @@ export function ControlPanel() {
               }
               onClick={() => dispatch({ type: 'CONFIRM_SKILL' })}
             >
-              确认技能
+              {t('control.confirmSkill')}
             </button>
           </>
         )}
@@ -160,7 +161,7 @@ export function ControlPanel() {
           <>
             {!state.pendingRevive ? (
               <>
-                <span>选择要复活的棋子：</span>
+                <span>{t('control.revivePrompt')}</span>
                 {deathPool
                   .filter(
                     (id) =>
@@ -169,21 +170,21 @@ export function ControlPanel() {
                   )
                   .map((id) => (
                     <button key={id} onClick={() => dispatch({ type: 'CHOOSE_REVIVE', id })}>
-                      {(getPiece(state.pieces[id].type) ?? PIECE_DEFS[state.pieces[id].type])?.name ?? state.pieces[id].type}
+                      {t((getPiece(state.pieces[id].type) ?? PIECE_DEFS[state.pieces[id].type])?.name ?? state.pieces[id].type)}
                     </button>
                   ))}
               </>
             ) : (
-              <span>点击己方备战区空位放置复活棋子</span>
+              <span>{t('control.revivePlace')}</span>
             )}
           </>
         )}
 
-        <button className="danger" onClick={() => dispatch({ type: 'END_TURN' })}>
-          结束回合
+        <button onClick={() => dispatch({ type: 'END_TURN' })}>
+          {t('control.endTurn')}
         </button>
         <button className="danger" onClick={() => dispatch({ type: 'RESIGN', owner: state.currentPlayer })}>
-          投降
+          {t('control.resign')}
         </button>
       </div>
     </section>

@@ -6,7 +6,7 @@ export type ServerOp =
   | { op: 'created'; room: string }
   | { op: 'joined'; room: string }
   | { op: 'peer'; status: 'joined' | 'left' }
-  | { op: 'error'; message: string };
+  | { op: 'error'; message: string; code?: string };
 
 export type AppMessage =
   | { kind: 'state'; state: GameState }

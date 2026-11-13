@@ -4,8 +4,8 @@ import type { SkillDefinition } from '../types';
 export const BUILTIN_SKILLS: SkillDefinition[] = [
   {
     id: 'warrior',
-    name: '战士技能',
-    description: '对 5×5 矩形内一个敌人造成 2 点伤害。',
+    name: 'skill.warrior.name',
+    description: 'skill.warrior.desc',
     cost: 2,
     targetMode: 'single',
     getTargetCells: getWarriorSkillCells,
@@ -17,8 +17,8 @@ export const BUILTIN_SKILLS: SkillDefinition[] = [
   },
   {
     id: 'mage',
-    name: '法师技能',
-    description: '对 5×5 环形上 1~3 个不同敌人各造成 2 点伤害。',
+    name: 'skill.mage.name',
+    description: 'skill.mage.desc',
     cost: 2,
     targetMode: 'multi',
     maxTargets: 3,
@@ -35,8 +35,8 @@ export const BUILTIN_SKILLS: SkillDefinition[] = [
   },
   {
     id: 'assassin',
-    name: '刺客技能',
-    description: '消耗 2 AP，获得一次免费移动和一次不反击的免费攻击。',
+    name: 'skill.assassin.name',
+    description: 'skill.assassin.desc',
     cost: 2,
     targetMode: 'none',
     getTargetCells: () => [],
@@ -45,8 +45,8 @@ export const BUILTIN_SKILLS: SkillDefinition[] = [
   },
   {
     id: 'priest',
-    name: '牧师技能',
-    description: '复活最近回合内阵亡的己方棋子到备战区空位。',
+    name: 'skill.priest.name',
+    description: 'skill.priest.desc',
     cost: 2,
     targetMode: 'none',
     getTargetCells: () => [],
@@ -59,8 +59,8 @@ export const BUILTIN_SKILLS: SkillDefinition[] = [
   },
   {
     id: 'promote',
-    name: '新手转职',
-    description: '击杀敌人后自动转职。',
+    name: 'skill.promote.name',
+    description: 'skill.promote.desc',
     cost: 0,
     targetMode: 'none',
     getTargetCells: () => [],
