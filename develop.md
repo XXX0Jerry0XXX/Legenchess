@@ -8,6 +8,7 @@
 - [项目结构](#项目结构)
 - [开发环境](#开发环境)
 - [构建与打包](#构建与打包)
+- [局域网联机](#局域网联机)
 - [测试](#测试)
 - [Mod API](#mod-api)
 - [API 文档](#api-文档)
@@ -61,6 +62,42 @@ start.bat
 - 服务打包：`npm run build:server`，把 `scripts/server.mjs` 与 `ws` 打成单文件 `release/server.cjs`。
 - 桌面安装包：`installer/setup.iss`（Inno Setup）+ `installer/launcher.vbs`；CI 在 Windows runner 下载便携 Node、打包 `release/` 并编译 `setup.exe`。
 - 本地一键启动：`start.bat`（自动装依赖、后台启动、打开浏览器）。
+
+## 局域网联机
+
+局域网联机采用「主机权威 + WebSocket 中继」架构。
+
+### 架构
+
+- 主机持有唯一正确状态并本地运行 reducer；客机只渲染并把输入回传主机。
+- 主机每次状态变化后向客机广播完整 `GameState`；客机收到后 `RESTORE` 对齐。
+- 客机把 UI 意图以 `{kind:'action'}` 转发给主机，由主机用 reducer 应用；客机不运行计时 / 观察 / 自动布阵 / AI 等驱动 effect。
+- 主机恒为 0 号先手，客机为 1 号后手；`GameProvider` 的 dispatch 封装用 `canAct` 门控，避免替对方行动。
+
+### 中继协议
+
+`program/scripts/lan-server.mjs` 导出 `attachLanRelay(server, path)`（挂到已有 HTTP 服务）与 `createLanRelay(port, host)`（独立监听，供测试与独立运行）。
+
+- 客户端 op：`create`、`join`、`relay`、`leave`。
+- 服务端回包：`created`、`joined`、`peer`（`joined` / `left`）、`error`（`code` + `message`）。
+- 房间为 4 位码（`A-Z0-9`，去掉易混淆字符），`Map<room, socket[]>` 最多配对两人，`relay` 原样转发给对端。
+- 错误码：`bad_message`、`room_not_found`、`unknown_op`。
+
+### 应用层消息
+
+- `{kind:'state', state}`：主机 → 客机，完整 `GameState`。
+- `{kind:'action', action}`：客机 → 主机，单个 `Action`。
+
+### 前端网络层
+
+- `src/net/netClient.ts`：浏览器 `WebSocket` 封装，`create()` / `join(address, room)`，连接 `ws://<host>/lan`。
+- `src/net/LanContext.tsx`：连接状态、角色、房间码、错误与 `createRoom` / `joinRoom` / `leave` / `send`。
+- `src/net/perspective.ts`：`localOwnerOf`（角色 → 玩家编号）、`maskState`（布阵阶段隐藏对手棋子）、`canAct`（是否轮到本地玩家）。
+
+### 开发与生产接入
+
+- 开发：`vite.config.ts` 插件在 Vite dev server 上挂 `/lan` 中继，并提供 `/lan/ips` 返回本机局域网 IPv4。
+- 生产：`scripts/server.mjs` 提供静态站点 + `/lan` 中继 + `/lan/ips`，启动后自动打开浏览器，默认端口 `16250`。
 
 ## 测试
 
