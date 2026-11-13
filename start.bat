@@ -14,7 +14,7 @@ if not exist node_modules (
 )
 
 echo Starting Legenchess...
-start "Legenchess" /min cmd /c "npm run dev"
+start "Legenchess" /min pwsh -NoProfile -Command "npm run dev"
 
 timeout /t 3 /nobreak >nul
 start "" http://localhost:5173
