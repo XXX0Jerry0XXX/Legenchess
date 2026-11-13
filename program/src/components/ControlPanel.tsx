@@ -2,9 +2,12 @@ import { ATTACK_COST, MAX_MAGE_TARGETS, MOVE_COST, PIECE_DEFS, SKILL_COST } from
 import { getPiece, getSkill } from '../game/registry';
 import { getAttackCells, getMageSkillCells, getWarriorSkillCells } from '../game/ranges';
 import { useGame } from '../state/GameProvider';
+import { useLan } from '../net/LanContext';
+import { canAct, localOwnerOf } from '../net/perspective';
 
 export function ControlPanel() {
   const { state, dispatch } = useGame();
+  const { role } = useLan();
   const selected = state.selectedId ? state.pieces[state.selectedId] : null;
   const ap = state.ap;
   const isFirst = state.currentPlayer === state.firstPlayer;
@@ -22,6 +25,16 @@ export function ControlPanel() {
   const revivable = deathPool.some(
     (id) => state.pieces[id]?.owner === state.currentPlayer && state.pieces[id]?.dead,
   );
+
+  if (role && !canAct(state, localOwnerOf(role))) {
+    return (
+      <section className="control-panel">
+        <div className="action-list">
+          <strong>等待对方行动</strong>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="control-panel">

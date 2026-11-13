@@ -8,6 +8,8 @@ import { StartScreen } from './components/StartScreen';
 import { PROMOTABLE, PIECE_DEFS } from './game/constants';
 import { createInitialState } from './game/reducer';
 import { GameProvider, useGame } from './state/GameProvider';
+import { LanProvider, useLan } from './net/LanContext';
+import { canAct, localOwnerOf } from './net/perspective';
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60);
@@ -17,6 +19,13 @@ function formatTime(seconds: number): string {
 
 function Game() {
   const { state, dispatch } = useGame();
+  const { role, leave } = useLan();
+  const localOwner = localOwnerOf(role);
+  const canActNow = canAct(state, localOwner);
+  const backToMenu = () => {
+    if (role) leave();
+    dispatch({ type: 'RESTORE', state: createInitialState() });
+  };
 
   if (state.phase === 'start') {
     return <StartScreen />;
@@ -75,14 +84,18 @@ function Game() {
             内查看棋盘，先手方可在计时结束前开始第一回合。
           </p>
           <div className="choice-row">
-            <button className="primary" onClick={() => dispatch({ type: 'START_PLAY' })}>
-              开始第一回合
-            </button>
+            {canActNow ? (
+              <button className="primary" onClick={() => dispatch({ type: 'START_PLAY' })}>
+                开始第一回合
+              </button>
+            ) : (
+              <span>等待先手方开始第一回合…</span>
+            )}
           </div>
         </Modal>
       )}
 
-      {state.pendingPromotion && state.phase !== 'finished' && (
+      {state.pendingPromotion && state.phase !== 'finished' && canActNow && (
         <Modal title="新手转职">
           <p>请选择转职方向：</p>
           <div className="choice-row">
@@ -103,10 +116,7 @@ function Game() {
               : `${ownerName(state.winner)} 获胜。`}
           </p>
           <div className="choice-row">
-            <button
-              className="primary"
-              onClick={() => dispatch({ type: 'RESTORE', state: createInitialState() })}
-            >
+            <button className="primary" onClick={backToMenu}>
               返回主菜单
             </button>
           </div>
@@ -118,8 +128,10 @@ function Game() {
 
 export function App() {
   return (
-    <GameProvider>
-      <Game />
-    </GameProvider>
+    <LanProvider>
+      <GameProvider>
+        <Game />
+      </GameProvider>
+    </LanProvider>
   );
 }

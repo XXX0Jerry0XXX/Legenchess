@@ -3,11 +3,16 @@ import { useState } from 'react';
 import { Modal } from './Modal';
 import { RulesButton } from './RulesButton';
 import type { AiLevel } from '../game/types';
+import { useLan } from '../net/LanContext';
 
 export function StartScreen() {
   const { dispatch, canResume } = useGame();
+  const { role, room, error, peerConnected, createRoom, joinRoom, leave } = useLan();
   const [showAiMenu, setShowAiMenu] = useState(false);
   const [showLocalMenu, setShowLocalMenu] = useState(false);
+  const [showLanMenu, setShowLanMenu] = useState(false);
+  const [lanAddress, setLanAddress] = useState('');
+  const [lanRoom, setLanRoom] = useState('');
 
   const startAi = (aiLevel: AiLevel, humanOwner: 0 | 1) => {
     dispatch({
@@ -30,6 +35,9 @@ export function StartScreen() {
         </button>
         <button onClick={() => setShowAiMenu(true)}>
           人机对战
+        </button>
+        <button onClick={() => setShowLanMenu(true)}>
+          局域网联机
         </button>
         {canResume && (
           <button
@@ -83,6 +91,57 @@ export function StartScreen() {
           </div>
           <div className="choice-row">
             <button onClick={() => setShowAiMenu(false)}>取消</button>
+          </div>
+        </Modal>
+      )}
+      {showLanMenu && (
+        <Modal title="局域网联机">
+          {error && <p role="alert">{error}</p>}
+          {!role && (
+            <>
+              <p>主机先运行 <code>npm run lan:server</code>，创建房间后让对方按 IP 与房间码加入。</p>
+              <div className="choice-row">
+                <button className="primary" onClick={createRoom}>创建房间（主机）</button>
+              </div>
+              <div className="choice-row">
+                <input
+                  placeholder="主机地址，如 192.168.1.10"
+                  value={lanAddress}
+                  onChange={(event) => setLanAddress(event.target.value)}
+                />
+                <input
+                  placeholder="房间码"
+                  maxLength={4}
+                  value={lanRoom}
+                  onChange={(event) => setLanRoom(event.target.value.toUpperCase())}
+                />
+                <button
+                  disabled={!lanAddress.trim() || lanRoom.length !== 4}
+                  onClick={() => joinRoom(lanAddress, lanRoom)}
+                >
+                  加入房间（客机）
+                </button>
+              </div>
+            </>
+          )}
+          {role === 'host' && (
+            <>
+              <p>房间码：<strong>{room}</strong></p>
+              <p>{peerConnected ? '对手已连接。' : '等待对手加入…'}</p>
+              <div className="choice-row">
+                <button
+                  className="primary"
+                  disabled={!peerConnected}
+                  onClick={() => dispatch({ type: 'START_SETUP', firstPlayer: 0, mode: 'lan' })}
+                >
+                  开始对战
+                </button>
+              </div>
+            </>
+          )}
+          {role === 'guest' && <p>已连接房间 {room}，等待主机开始…</p>}
+          <div className="choice-row">
+            <button onClick={() => { leave(); setShowLanMenu(false); }}>取消</button>
           </div>
         </Modal>
       )}

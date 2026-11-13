@@ -2,14 +2,28 @@ import { PIECE_DEFS, SETUP_COUNTS } from '../game/constants';
 import { useGame } from '../state/GameProvider';
 import type { PieceType } from '../game/types';
 import { PresetManager } from './PresetManager';
+import { useLan } from '../net/LanContext';
+import { canAct, localOwnerOf } from '../net/perspective';
 
 const ORDER: PieceType[] = ['novice', 'warrior', 'mage', 'assassin', 'priest', 'chairman'];
 
 export function SetupScreen() {
   const { state, dispatch } = useGame();
+  const { role } = useLan();
   const tray = state.setupTray[state.setupOwner];
   const total = Object.values(tray).reduce((a, b) => a + b, 0);
   const ownerName = state.setupOwner === state.firstPlayer ? '先手方' : '后手方';
+
+  if (!canAct(state, localOwnerOf(role))) {
+    return (
+      <section className="control-panel">
+        <div className="action-list">
+          <strong>等待对方布阵</strong>
+          <span>对方正在布置棋子，请稍候。</span>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="control-panel">
