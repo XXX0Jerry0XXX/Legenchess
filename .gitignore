@@ -38,3 +38,8 @@ __pycache__/
 *.pyc
 .venv/
 training/runs/
+
+# Desktop installer staging and output
+release/
+node.zip
+node-extract/

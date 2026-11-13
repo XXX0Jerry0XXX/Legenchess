@@ -1,7 +1,7 @@
 {
   "name": "legenchess",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.5.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "docs": "typedoc",
+    "build:server": "esbuild scripts/server.mjs --bundle --platform=node --format=cjs --outfile=../release/server.cjs",
     "lan:server": "node scripts/lan-server.mjs",
     "rl:build": "esbuild scripts/rl-server.ts --bundle --platform=node --format=esm --outfile=.rl/rl-server.mjs"
   },

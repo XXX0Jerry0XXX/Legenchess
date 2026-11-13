@@ -1,0 +1,71 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: program/package-lock.json
+
+      - name: Install dependencies
+        working-directory: program
+        run: npm ci
+
+      - name: Build frontend
+        working-directory: program
+        run: npm run build
+
+      - name: Build server bundle
+        working-directory: program
+        run: npm run build:server
+
+      - name: Stage static files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          Copy-Item -Recurse -Force program/dist release/dist
+
+      - name: Download portable Node
+        shell: pwsh
+        run: |
+          $nodeVersion = "22.11.0"
+          Invoke-WebRequest "https://nodejs.org/dist/v$nodeVersion/node-v$nodeVersion-win-x64.zip" -OutFile node.zip
+          Expand-Archive node.zip -DestinationPath node-extract
+          Copy-Item "node-extract/node-v$nodeVersion-win-x64/node.exe" release/node.exe
+
+      - name: Stage launcher
+        shell: pwsh
+        run: Copy-Item installer/launcher.vbs release/launcher.vbs
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup -y
+
+      - name: Compile installer
+        shell: pwsh
+        run: |
+          $tag = "${{ github.ref_name }}"
+          $version = $tag.TrimStart('v')
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DAppTag=$tag" "/DAppVersion=$version" installer/setup.iss
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: 传棋${{ github.ref_name }}
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          files: release/*-setup.exe
